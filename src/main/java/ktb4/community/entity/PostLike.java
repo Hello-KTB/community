@@ -7,7 +7,7 @@ import lombok.*;
 @Getter @Setter
 public class PostLike {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Embedded
+    @EmbeddedId
     private PostLikeId postLikeId;
 
     protected PostLike() {}

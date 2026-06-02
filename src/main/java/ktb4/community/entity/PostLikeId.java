@@ -1,20 +1,23 @@
 package ktb4.community.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
 @Embeddable
 @Getter @Setter
 public class PostLikeId {
-
-    private Post post;
-    private User user;
+    @Column(name = "post_id")
+    private Long post_id;
+    @Column(name = "user_id")
+    private Long user_id;
 
     protected PostLikeId() {}
 
-    public PostLikeId(Post post, User user) {
-        this.post = post;
-        this.user = user;
+    public PostLikeId(Long post_id, Long user_id) {
+        post_id = post_id;
+        user_id = user_id;
     }
 }
