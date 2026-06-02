@@ -6,15 +6,15 @@ import lombok.*;
 @Entity
 @Getter @Setter
 public class PostLike {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long post_id;
-    private Long user_id;
+    @Id @Column(name = "post_id", nullable = false)
+    private Long postId;
+    @Id @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     protected PostLike() {}
 
-    public PostLike(Long post_id, Long user_id) {
-        this.post_id = post_id;
-        this.user_id = user_id;
+    public PostLike(Long postId, Long userId) {
+        this.postId = postId;
+        this.userId = userId;
     }
 }
