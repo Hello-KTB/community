@@ -1,12 +1,19 @@
 package ktb4.community.entity;
 
-import lombok.Data;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
-import java.util.Date;
 
-@Data
+import java.time.LocalDateTime;
+
+@Entity
+@Getter @Setter
 public class Post {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long postId;
     private Long userId;
     private String postName;
@@ -14,15 +21,13 @@ public class Post {
     private String postImage;
     private int postLikes;
     private int postViews;
-    private Date postCreatedAt;
-    private Date postUpdatedAt;
+    private LocalDateTime postCreatedAt;
+    private LocalDateTime postUpdatedAt;
 
     // 기본 생성자
-    public Post() {}
+    protected Post() {}
 
-    // 매개변수 생성자
-    public Post(Long postId, Long userId,String postName, String postContent, String postImage, int postLikes, int postViews, Date postCreatedAt, Date postUpdatedAt) {
-        this.postId = postId;
+    public Post(Long userId,String postName, String postContent, String postImage, int postLikes, int postViews, LocalDateTime postCreatedAt, LocalDateTime postUpdatedAt) {
         this.userId = userId;
         this.postName = postName;
         this.postContent = postContent;
@@ -30,22 +35,6 @@ public class Post {
         this.postLikes = postLikes;
         this.postViews = postViews;
         this.postCreatedAt = postCreatedAt;
-        this.postUpdatedAt = postUpdatedAt;
-    }
-
-    public void changePostName(String postName) {
-        this.postName = postName;
-    }
-
-    public void changePostContent(String postContent) {
-        this.postContent = postContent;
-    }
-
-    public void changePostImage(String postImage) {
-        this.postImage = postImage;
-    }
-
-    public void updatePostUpdatedAt(Date postUpdatedAt) {
         this.postUpdatedAt = postUpdatedAt;
     }
 }

@@ -1,40 +1,32 @@
 package ktb4.community.entity;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
 
-import java.util.Date;
-
-@Data
+@Entity
+@Getter @Setter
 public class Comment {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long commentId;
     private Long userId;
     private Long postId;
     private String commentContent;
     private int commentLikes;
-    private Date commentCreatedAt;
-    private Date commentUpdatedAt;
+    private LocalDateTime commentCreatedAt;
+    private LocalDateTime commentUpdatedAt;
 
     // 기본 생성자
-    public Comment() {}
+    protected Comment() {}
 
     // 매개변수 생성자
-    public Comment(Long commentId, Long userId, Long postId, String commentContent,  int commentLikes, Date commentCreatedAt, Date commentUpdatedAt) {
-        this.commentId = commentId;
+    public Comment(Long userId, Long postId, String commentContent,  int commentLikes, LocalDateTime commentCreatedAt, LocalDateTime commentUpdatedAt) {
         this.userId = userId;
         this.postId = postId;
         this.commentContent = commentContent;
         this.commentLikes = commentLikes;
         this.commentCreatedAt = commentCreatedAt;
-        this.commentUpdatedAt = commentUpdatedAt;
-    }
-
-    public void changeCommentContent(String postContent) {
-        this.commentContent = postContent;
-    }
-
-    public void updateCommentUpdatedAt(Date commentUpdatedAt) {
         this.commentUpdatedAt = commentUpdatedAt;
     }
 }
