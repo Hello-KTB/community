@@ -1,16 +1,12 @@
 package ktb4.community.dto.request;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
-@Getter
-@NoArgsConstructor
-/*
-RequestDto의
- */
 public class UserRequestDto {
     private String userEmail;
     private String userPassword;
     private String userNickname;
     private String userImage;
+    private LocalDateTime userCreatedAt;
+    private LocalDateTime userUpdatedAt;
 }

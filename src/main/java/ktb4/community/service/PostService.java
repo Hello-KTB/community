@@ -1,5 +1,6 @@
-package ktb4.community.service;
 /*
+package ktb4.community.service;
+
 import ktb4.community.dto.PostRequestDto;
 import ktb4.community.dto.PostResponseDto;
 import ktb4.community.entity.Post;
@@ -54,5 +55,4 @@ public class PostService {
     public void deletePost(Long postId) {
         postRepository.deleteById(postId);
     }
-}
-*/
+}*/
