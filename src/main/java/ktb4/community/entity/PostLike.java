@@ -6,7 +6,6 @@ import lombok.*;
 @Entity
 @Getter @Setter
 public class PostLike {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EmbeddedId
     private PostLikeId postLikeId;
 
