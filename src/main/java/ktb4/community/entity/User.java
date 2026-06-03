@@ -43,4 +43,10 @@ public class User {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void changeNickname(String newNickname) {
+        if(newNickname == null || newNickname.isBlank()) throw new IllegalArgumentException("닉네임을 입력해주세요");
+        if(newNickname.equals(this.nickname)) throw new IllegalArgumentException("이전과 같은 닉네임입니다");
+        this.nickname = newNickname;
+    }
 }
