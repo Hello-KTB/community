@@ -10,53 +10,53 @@ import java.time.LocalDateTime;
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="user_id")
-    private Long userId;
+    private Long id;
 
     @Column(name = "user_email", nullable = false, unique = true)
-    private String userEmail;
+    private String email;
 
     @Column(name = "user_nickname", nullable = false, unique = true)
-    private String userNickname;
+    private String nickname;
 
     @Column(name = "user_password", nullable = false)
-    private String userPassword;
+    private String password;
 
     @Column(name = "user_image")
-    private String userImage;
+    private String image;
 
     @Column(name = "user_createdAt")
-    private LocalDateTime userCreatedAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "user_updatedAt")
-    private LocalDateTime userUpdatedAt;
+    private LocalDateTime updatedAt;
 
     protected User() {}
 
-    public User(String userEmail, String userPassword, String userNickname, String userImage) {
-        if (userEmail == null || userEmail.isBlank()) throw new IllegalArgumentException("이메일을 입력해주세요");
-        if (userPassword == null || userPassword.isBlank()) throw new IllegalArgumentException("비밀번호를 입력해주세요");
-        if (userNickname == null || userNickname.isBlank()) throw new IllegalArgumentException("닉네임을 입력해주세요");
-        this.userEmail = userEmail;
-        this.userPassword = userPassword;
-        this.userNickname = userNickname;
-        this.userImage = userImage;
-        this.userCreatedAt = LocalDateTime.now();
-        this.userUpdatedAt = LocalDateTime.now();
+    public User(String email, String password, String nickname, String image) {
+        if (email == null || email.isBlank()) throw new IllegalArgumentException("이메일을 입력해주세요");
+        if (password == null || password.isBlank()) throw new IllegalArgumentException("비밀번호를 입력해주세요");
+        if (nickname == null || nickname.isBlank()) throw new IllegalArgumentException("닉네임을 입력해주세요");
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.image = image;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
-    public static User createUser(String userEmail, String userPassword, String userNickname, String userImage) {
-        return new User(userEmail, userPassword, userNickname, userImage);
+    public static User createUser(String email, String password, String nickname, String image) {
+        return new User(email, password, nickname, image);
     }
 
     public void changeUserNickname(String newNickname) {
         if(newNickname == null || newNickname.isBlank()) throw new IllegalArgumentException("닉네임을 입력해주세요");
-        if(newNickname.equals(this.userNickname)) throw new IllegalArgumentException("이전 닉네임과 다른 닉네임을 입력해주세요");
-        this.userNickname = newNickname;
+        if(newNickname.equals(this.nickname)) throw new IllegalArgumentException("이전 닉네임과 다른 닉네임을 입력해주세요");
+        this.nickname = newNickname;
     }
 
     public void changeUserPassword(String newUserPassword) {
         if(newUserPassword == null || newUserPassword.isBlank()) throw new IllegalArgumentException("비밀번호를 입력해주세요");
-        if(newUserPassword.equals(this.userPassword)) throw new IllegalArgumentException("이전 비밀번호과 다른 비밀번호를 입력해주세요");
-        this.userPassword = newUserPassword;
+        if(newUserPassword.equals(this.password)) throw new IllegalArgumentException("이전 비밀번호과 다른 비밀번호를 입력해주세요");
+        this.password = newUserPassword;
     }
 }
