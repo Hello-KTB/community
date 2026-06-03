@@ -43,20 +43,4 @@ public class User {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
-
-    public static User createUser(String email, String password, String nickname, String image) {
-        return new User(email, password, nickname, image);
-    }
-
-    public void changeNickname(String newNickname) {
-        if(newNickname == null || newNickname.isBlank()) throw new IllegalArgumentException("닉네임을 입력해주세요");
-        if(newNickname.equals(this.nickname)) throw new IllegalArgumentException("이전 닉네임과 다른 닉네임을 입력해주세요");
-        this.nickname = newNickname;
-    }
-
-    public void changePassword(String newPassword) {
-        if(newPassword == null || newPassword.isBlank()) throw new IllegalArgumentException("비밀번호를 입력해주세요");
-        if(newPassword.equals(this.password)) throw new IllegalArgumentException("이전 비밀번호과 다른 비밀번호를 입력해주세요");
-        this.password = newPassword;
-    }
 }

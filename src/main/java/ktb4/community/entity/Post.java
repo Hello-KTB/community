@@ -47,11 +47,4 @@ public class Post {
         this.updatedAt = updatedAt;
         this.views = 0;
     }
-
-    public static Post createPost(String id, String title, String content, String image, LocalDateTime currentTime) {
-        if(title == null || title.isBlank()) throw new IllegalArgumentException("게시물 제목을 입력해주세요");
-        if (content == null || content.isBlank()) throw new IllegalArgumentException("게시물 내용을 입력해주세요");
-
-        return new Post();
-    }
 }
