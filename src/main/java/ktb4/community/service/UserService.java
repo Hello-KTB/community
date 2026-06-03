@@ -3,6 +3,8 @@ package ktb4.community.service;
 import ktb4.community.entity.User;
 import ktb4.community.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,10 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public User create(String email, String password, String nickname, String image) {
-        User user = new User(email, password, nickname, image);
+        String encodedPassword = passwordEncoder.encode(password);
+
+        User user = new User(email, encodedPassword, nickname, image);
         return userRepository.save(user);
     }
 

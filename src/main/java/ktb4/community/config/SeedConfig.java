@@ -9,6 +9,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -30,8 +31,12 @@ public class SeedConfig {
     void seed() {
         if (userRepository.count() >= 10 && postRepository.count() >= 10) return;
 
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
         IntStream.rangeClosed(1, 10).forEach(i -> {
-            User user = new User("tester"+i+"@adapterz.kr", "123aS!"+i, "tester"+i, "profile_image"+i);
+            String rawPassword = "123aS!" + i;
+            String encodedPassword = passwordEncoder.encode(rawPassword);
+            User user = new User("tester"+i+"@adapterz.kr", encodedPassword, "tester"+i, "profile_image"+i);
             userRepository.save(user);
 
             Post post = new Post(user,"title"+i, "content"+i, "content_image"+i, LocalDateTime.now(), LocalDateTime.now());
