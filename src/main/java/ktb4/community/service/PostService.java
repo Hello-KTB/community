@@ -1,8 +1,5 @@
-/*
 package ktb4.community.service;
 
-import ktb4.community.dto.PostRequestDto;
-import ktb4.community.dto.PostResponseDto;
 import ktb4.community.entity.Post;
 import ktb4.community.entity.User;
 import ktb4.community.repository.PostRepository;
@@ -11,48 +8,45 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
     @Transactional
-    public PostResponseDto createPost(Long userId, PostRequestDto request) {
+    public Post create(Long userId, String title, String content, String image) {
         User author = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalStateException("User not found"));
+                .orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
 
-        Post post = new Post(
-                request.getTitle(),
-                request.getContent(),
-                author
-        );
+        LocalDateTime createdAt = LocalDateTime.now();
+        LocalDateTime updatedAt = LocalDateTime.now();
+        Post post = new Post(author, title, content, image, createdAt, updatedAt);
 
-        Post savedPost = postRepository.save(post);
-        return new PostResponseDto(savedPost);
+        return postRepository.save(post);
     }
 
     @Transactional(readOnly = true)
-    public PostResponseDto getPost(Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
-        return new PostResponseDto(post);
+    public Post findById(Long id) {
+        return postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
     }
 
     @Transactional
-    public PostResponseDto updatePost(Long postId, PostRequestDto request) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+    public Post update(Long id, String title, String content, String image) {
+        Post post = findById(id);
 
-        post.changeTitle(request.getTitle());
-        post.changeContent(request.getContent());
-
-        return new PostResponseDto(post);
+        post.setTitle(title);
+        post.setContent(content);
+        post.setImage(image);
+        return post;
     }
 
     @Transactional
-    public void deletePost(Long postId) {
-        postRepository.deleteById(postId);
+    public void delete(Long id) {
+        postRepository.delete(findById(id));
     }
-}*/
+}
