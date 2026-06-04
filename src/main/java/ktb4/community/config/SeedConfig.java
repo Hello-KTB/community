@@ -29,11 +29,11 @@ public class SeedConfig {
 
     @Transactional
     void seed() {
-        if (userRepository.count() >= 10 && postRepository.count() >= 10) return;
+        if (userRepository.count() >= 100 && postRepository.count() >= 100) return;
 
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-        IntStream.rangeClosed(1, 10).forEach(i -> {
+        IntStream.rangeClosed(1, 100).forEach(i -> {
             String rawPassword = "123aS!" + i;
             String encodedPassword = passwordEncoder.encode(rawPassword);
             User user = new User("tester"+i+"@adapterz.kr", encodedPassword, "tester"+i, "profile_image"+i);
