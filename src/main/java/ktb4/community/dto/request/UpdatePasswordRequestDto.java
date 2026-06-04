@@ -1,12 +1,12 @@
 package ktb4.community.dto.request;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Getter
+@Getter @Setter
 @NoArgsConstructor
-public class AuthRequestDto {
-    private String email;
+public class UpdatePasswordRequestDto {
     private String password;
+    private String validatePassword;
 }

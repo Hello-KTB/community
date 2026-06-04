@@ -1,9 +1,14 @@
 package ktb4.community.controller;
 
+import ktb4.community.dto.request.CreateUserRequestDto;
+import ktb4.community.dto.request.UpdatePasswordRequestDto;
+import ktb4.community.dto.request.UpdateUserRequestDto;
+import ktb4.community.dto.response.ApiResponseDto;
+import ktb4.community.dto.response.UpdateUserResponseDto;
 import ktb4.community.entity.User;
 import ktb4.community.service.UserService;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,54 +18,51 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public UserResponse create(@RequestBody CreateUserRequest request) {
-        User saved = userService.create(request.email, request.password, request.nickname, request.image);
-        return UserResponse.of(saved);
+    public ResponseEntity<ApiResponseDto> create(@RequestBody CreateUserRequestDto request) {
+        User saved = userService.create(request);
+        return ResponseEntity
+                .status(201)
+                .body(new ApiResponseDto<>(
+                        201,
+                        true,
+                        "회원가입에 성공하셨습니다",
+                        null));
     }
 
+    /*
     @GetMapping(("/{id}"))
-    public UserResponse findById(@PathVariable Long id) {
-        return UserResponse.of(userService.findById(id));
-    }
+    public ResponseEntity findById(@PathVariable Long id) {
+        return ResponseEntity.status(201).build();
+    }*/
 
     @PatchMapping("/{id}")
-    public UserResponse update(@PathVariable Long id, @RequestBody UpdateUserRequest request) {
-        User updatedUser = userService.update(id, request.nickname);
-        return UserResponse.of(updatedUser);
+    public ResponseEntity<ApiResponseDto> update(@PathVariable Long id, @RequestBody UpdateUserRequestDto request) {
+        User updatedUser = userService.update(id, request.getNickname(), request.getProfileImage());
+        return ResponseEntity
+                .status(200)
+                .body(new ApiResponseDto<>(
+                        200,
+                        true,
+                        "회원정보가 수정되었습니다",
+                        new UpdateUserResponseDto(updatedUser.getNickname(), updatedUser.getProfileImage())
+                ));
+    }
+
+    @PatchMapping("/{id}/password")
+    public ResponseEntity<ApiResponseDto> updatePassword(@PathVariable Long id, @RequestBody UpdatePasswordRequestDto request) {
+        User updatedUser = userService.updatePassword(id, request.getPassword(), request.getValidatePassword());
+        return ResponseEntity
+                .status(200)
+                .body(new ApiResponseDto<>(
+                        200,
+                        true,
+                        "회원정보가 수정되었습니다",
+                        new UpdateUserResponseDto(updatedUser.getNickname(), updatedUser.getProfileImage())
+                ));
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         userService.delete(id);
-    }
-
-    @Data
-    public static class UpdateUserRequest {
-        private String nickname;
-    }
-
-    @Data
-    public static class CreateUserRequest {
-        private String email;
-        private String password;
-        private String nickname;
-        private String image;
-    }
-
-    @Data
-    public static class UserResponse {
-        private Long id;
-        private String email;
-        private String nickname;
-
-        public static UserResponse of(User user) {
-            return new UserResponse(user.getId(), user.getEmail(), user.getNickname());
-        }
-
-        public UserResponse(Long id, String email, String nickname) {
-            this.id = id;
-            this.email = email;
-            this.nickname = nickname;
-        }
     }
 }
