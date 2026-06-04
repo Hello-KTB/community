@@ -8,6 +8,7 @@ import ktb4.community.dto.response.UpdateUserResponseDto;
 import ktb4.community.entity.User;
 import ktb4.community.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,15 +16,16 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/users")
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
 
     @PostMapping
     public ResponseEntity<ApiResponseDto> create(@RequestBody CreateUserRequestDto request) {
         User saved = userService.create(request);
         return ResponseEntity
-                .status(201)
+                .status(HttpStatus.CREATED)
                 .body(new ApiResponseDto<>(
-                        201,
+                        HttpStatus.CREATED.value(),
                         true,
                         "회원가입에 성공하셨습니다",
                         null));
