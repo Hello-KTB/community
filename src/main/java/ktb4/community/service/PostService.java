@@ -1,16 +1,23 @@
 package ktb4.community.service;
 
 import ktb4.community.dto.request.CreatePostRequestDto;
+import ktb4.community.dto.response.PostDetailResponseDto;
+import ktb4.community.dto.response.PostSummaryResponseDto;
 import ktb4.community.entity.Post;
 import ktb4.community.entity.User;
-import ktb4.community.filter.JwtAuthFilter;
 import ktb4.community.repository.PostRepository;
 import ktb4.community.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +42,14 @@ public class PostService {
     @Transactional(readOnly = true)
     public Post findById(Long id) {
         return postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
+    }
+
+    public Page<PostSummaryResponseDto> getPostsWithPaging(int page, int size) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createdAt"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sorts));
+        Page<Post> posts = postRepository.findAll(pageable);
+        return postRepository.findAll(pageable);
     }
 
     @Transactional

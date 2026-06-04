@@ -1,19 +1,18 @@
 package ktb4.community.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import ktb4.community.dto.request.CreatePostRequestDto;
 import ktb4.community.dto.request.UpdatePostRequestDto;
-import ktb4.community.dto.response.ApiResponseDto;
-import ktb4.community.dto.response.CreatePostResponseDto;
-import ktb4.community.dto.response.UpdatePostResponseDto;
+import ktb4.community.dto.response.*;
 import ktb4.community.entity.Post;
-import ktb4.community.filter.JwtAuthFilter;
 import ktb4.community.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/v1/posts")
@@ -37,15 +36,21 @@ public class PostController {
                 );
     }
 
+    @GetMapping
+    public Page<PostSummaryResponseDto> getPosts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10")int size) {
+        return postService.getPostsWithPaging(page, size);
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponseDto> get(HttpServletRequest request, @PathVariable Long id) {
+    public ResponseEntity<ApiResponseDto> get(@PathVariable Long id) {
+        Post post = postService.findById(id);
         return ResponseEntity
-                .status(HttpStatus.CREATED)
+                .status(HttpStatus.OK)
                 .body(new ApiResponseDto<>(
-                                HttpStatus.CREATED.value(),
+                                HttpStatus.OK.value(),
                                 true,
-                                "게시물이 등록되었습니다",
-                                new CreatePostResponseDto(post.getId(), post.getTitle(), post.getAuthor().getNickname(), post.getContent(), post.getImage(), post.getCreatedAt(), post.getUpdatedAt())
+                                "특정 게시물을 조회합니다",
+                                new PostDetailResponseDto(post.getId(), post.getTitle(), post.getAuthor().getNickname(), post.getContent(), post.getImage(), 0, 0, post.getCreatedAt(), post.getUpdatedAt(), List.of())
                         )
                 );
     }
