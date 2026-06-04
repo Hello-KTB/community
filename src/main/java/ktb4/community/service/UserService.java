@@ -48,8 +48,8 @@ public class UserService {
     @Transactional
     public User updatePassword(Long id, String password, String validatePassword) {
         User user = findById(id);
-        if (password != null && validatePassword != null) {
-            user.changePassword(password,  validatePassword);
+        if (password != null && validatePassword != null && password.equals(validatePassword)) {
+            user.changePassword(passwordEncoder.encode(password));
         }
         return userRepository.save(user);
     }

@@ -47,17 +47,16 @@ public class User {
     public void changeNickname(String newNickname) {
         if(newNickname == null || newNickname.isBlank()) throw new IllegalArgumentException("닉네임을 입력해주세요");
         if(newNickname.equals(this.nickname)) throw new IllegalArgumentException("이전과 같은 닉네임입니다");
-        this.nickname = newNickname;
+        setNickname(newNickname);
     }
 
     public void changeProfileImage(String newProfileImage) {
         if(newProfileImage.equals(this.profileImage)) throw new IllegalArgumentException("이전과 같은 프로필 사진입니다");
-        this.profileImage = newProfileImage;
+        setProfileImage(newProfileImage);
     }
 
-    public void changePassword(String newPassword, String newValidatePassword) {
+    public void changePassword(String newPassword) {
         if(newPassword.equals(this.password)) throw new IllegalArgumentException("이전과 같은 비밀번호입니다");
-        if(!newPassword.equals(newValidatePassword)) throw new IllegalArgumentException("비밀번호 확인이 틀렸습니다");
-        this.password = newPassword;
+        setPassword(newPassword);
     }
 }
