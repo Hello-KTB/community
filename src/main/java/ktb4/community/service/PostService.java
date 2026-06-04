@@ -1,7 +1,9 @@
 package ktb4.community.service;
 
+import ktb4.community.dto.request.CreatePostRequestDto;
 import ktb4.community.entity.Post;
 import ktb4.community.entity.User;
+import ktb4.community.filter.JwtAuthFilter;
 import ktb4.community.repository.PostRepository;
 import ktb4.community.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +21,13 @@ public class PostService {
     private final UserRepository userRepository;
 
     @Transactional
-    public Post create(Long userId, String title, String content, String image) {
+    public Post create(Long userId, CreatePostRequestDto request) {
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
 
         LocalDateTime createdAt = LocalDateTime.now();
         LocalDateTime updatedAt = LocalDateTime.now();
-        Post post = new Post(author, title, content, image, createdAt, updatedAt);
+        Post post = new Post(author, request.getTitle(), request.getContent(), request.getImage(), createdAt, updatedAt);
 
         return postRepository.save(post);
     }

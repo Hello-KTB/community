@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter @Setter
 @NoArgsConstructor
-public class CreatePostRequestDto {
+public class UpdatePostRequestDto {
     private String title;
     private String content;
     private String image;
