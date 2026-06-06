@@ -5,19 +5,15 @@ import ktb4.community.dto.request.CreatePostRequestDto;
 import ktb4.community.dto.request.UpdatePostRequestDto;
 import ktb4.community.dto.response.*;
 import ktb4.community.entity.Post;
-import ktb4.community.repository.PostRepository;
+import ktb4.community.entity.PostLikeId;
+import ktb4.community.service.PostLikeService;
 import ktb4.community.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/v1/posts")
@@ -25,7 +21,7 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
-    private final PostRepository postRepository;
+    private final PostLikeService postLikeService;
 
     @PostMapping
     public ResponseEntity<ApiResponseDto> create(HttpServletRequest request, @RequestBody CreatePostRequestDto dto) {
@@ -89,5 +85,33 @@ public class PostController {
         Long userId = (Long)request.getAttribute("userId");
         postService.delete(id, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/likes")
+    public ResponseEntity<ApiResponseDto> pressPostLike(HttpServletRequest request, @PathVariable Long id) {
+        Long userId = (Long)request.getAttribute("userId");
+        PostLikeResponseDto dto = postLikeService.pressLike(id, userId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponseDto<>(
+                        HttpStatus.OK.value(),
+                        true,
+                        "좋아요를 누르셨습니다",
+                        dto
+                ));
+    }
+
+    @DeleteMapping("/{id}/likes")
+    public ResponseEntity<ApiResponseDto> cancelPostLike(HttpServletRequest request, @PathVariable Long id) {
+        Long userId = (Long)request.getAttribute("userId");
+        PostLikeResponseDto dto = postLikeService.cancelLike(new PostLikeId(id, userId));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponseDto<>(
+                        HttpStatus.OK.value(),
+                        true,
+                        "좋아요를 취소하셨습니다",
+                        dto
+                ));
     }
 }

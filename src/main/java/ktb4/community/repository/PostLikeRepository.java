@@ -6,5 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PostlikeRepository extends JpaRepository<PostLike, PostLikeId> {
+public interface PostLikeRepository extends JpaRepository<PostLike, PostLikeId> {
+    long countByPostLikeId_PostId(Long postId);
+    boolean existsByPostLikeId(PostLikeId postLikeId);
 }

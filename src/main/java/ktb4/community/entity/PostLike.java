@@ -5,13 +5,10 @@ import lombok.*;
 
 @Entity
 @Getter @Setter
+@AllArgsConstructor
 public class PostLike {
     @EmbeddedId
     private PostLikeId postLikeId;
 
     protected PostLike() {}
-
-    public PostLike(PostLikeId postLikeId) {
-        this.postLikeId = postLikeId;
-    }
 }

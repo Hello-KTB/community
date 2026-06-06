@@ -8,6 +8,7 @@ import lombok.Setter;
 
 @Embeddable
 @Getter @Setter
+@EqualsAndHashCode
 public class PostLikeId {
     @Column(name = "post_id")
     private Long post_id;
@@ -17,7 +18,7 @@ public class PostLikeId {
     protected PostLikeId() {}
 
     public PostLikeId(Long post_id, Long user_id) {
-        post_id = post_id;
-        user_id = user_id;
+        this.post_id = post_id;
+        this.user_id = user_id;
     }
 }
