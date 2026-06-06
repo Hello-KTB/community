@@ -1,6 +1,5 @@
 package ktb4.community.dto.response;
 
-import ktb4.community.entity.Comment;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

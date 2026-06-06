@@ -71,9 +71,9 @@ public class PostController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponseDto> update(HttpServletRequest request, @RequestBody UpdatePostRequestDto dto) {
-        Long id = (Long)request.getAttribute("userId");
-        Post updatedPost = postService.update(id, dto.getTitle(),dto.getContent(), dto.getImage());
+    public ResponseEntity<ApiResponseDto> update(HttpServletRequest request, @PathVariable Long id, @RequestBody UpdatePostRequestDto dto) {
+        Long userId = (Long)request.getAttribute("userId");
+        Post updatedPost = postService.update(id, userId, dto.getTitle(),dto.getContent(), dto.getImage());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(new ApiResponseDto<>(
@@ -85,8 +85,9 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(HttpServletRequest request) {
-        Long id = (Long)request.getAttribute("userId");
-        postService.delete(id);
+    public ResponseEntity delete(HttpServletRequest request,  @PathVariable Long id) {
+        Long userId = (Long)request.getAttribute("userId");
+        postService.delete(id, userId);
+        return ResponseEntity.noContent().build();
     }
 }
