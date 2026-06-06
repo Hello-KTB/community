@@ -44,12 +44,42 @@ public class PostService {
         return postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
     }
 
+    @Transactional(readOnly = true)
     public Page<PostSummaryResponseDto> getPostsWithPaging(int page, int size) {
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("createdAt"));
         Pageable pageable = PageRequest.of(page, size, Sort.by(sorts));
         Page<Post> posts = postRepository.findAll(pageable);
-        return postRepository.findAll(pageable);
+
+        return posts.map(post -> new PostSummaryResponseDto(
+                post.getId(),
+                post.getTitle(),
+                post.getAuthor().getNickname(),
+                0,  // likes
+                0,  // comments
+                post.getViews(),
+                post.getCreatedAt(),
+                post.getUpdatedAt()
+        ));
+    }
+
+    @Transactional(readOnly = true)
+    public PostDetailResponseDto getPostDetail(Long id) {
+        Post post = findById(id);
+
+        return new PostDetailResponseDto(
+                post.getId(),
+                post.getTitle(),
+                post.getAuthor().getNickname(),
+                post.getContent(),
+                post.getImage(),
+                0,
+                0,
+                post.getViews(),
+                post.getCreatedAt(),
+                post.getUpdatedAt(),
+                List.of()
+        );
     }
 
     @Transactional

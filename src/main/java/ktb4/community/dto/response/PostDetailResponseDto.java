@@ -1,7 +1,6 @@
 package ktb4.community.dto.response;
 
 import ktb4.community.entity.Comment;
-import ktb4.community.entity.Post;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -18,7 +17,8 @@ public class PostDetailResponseDto {
     private String image;
     private int likes;
     private int comment_count;
+    private int views;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<Comment> comments;
+    private List<CommentResponseDto> comments;
 }

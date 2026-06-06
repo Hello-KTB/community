@@ -5,13 +5,18 @@ import ktb4.community.dto.request.CreatePostRequestDto;
 import ktb4.community.dto.request.UpdatePostRequestDto;
 import ktb4.community.dto.response.*;
 import ktb4.community.entity.Post;
+import ktb4.community.repository.PostRepository;
 import ktb4.community.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -20,6 +25,7 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
+    private final PostRepository postRepository;
 
     @PostMapping
     public ResponseEntity<ApiResponseDto> create(HttpServletRequest request, @RequestBody CreatePostRequestDto dto) {
@@ -37,20 +43,29 @@ public class PostController {
     }
 
     @GetMapping
-    public Page<PostSummaryResponseDto> getPosts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10")int size) {
-        return postService.getPostsWithPaging(page, size);
+    public ResponseEntity<ApiResponseDto> getPosts(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10")int size) {
+
+        Page<PostSummaryResponseDto> posts = postService.getPostsWithPaging(page,size);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponseDto<>(
+                                HttpStatus.OK.value(),
+                                true,
+                                "게시물 목록을 조회합니다",
+                                posts
+                ));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponseDto> get(@PathVariable Long id) {
-        Post post = postService.findById(id);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(new ApiResponseDto<>(
                                 HttpStatus.OK.value(),
                                 true,
                                 "특정 게시물을 조회합니다",
-                                new PostDetailResponseDto(post.getId(), post.getTitle(), post.getAuthor().getNickname(), post.getContent(), post.getImage(), 0, 0, post.getCreatedAt(), post.getUpdatedAt(), List.of())
+                                postService.getPostDetail(id)
                         )
                 );
     }

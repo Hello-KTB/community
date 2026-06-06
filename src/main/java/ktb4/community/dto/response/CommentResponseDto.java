@@ -7,13 +7,10 @@ import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-public class PostSummaryResponseDto {
+public class CommentResponseDto {
     private Long id;
-    private String title;
     private String nickname;
-    private int likes;
-    private int comments;
-    private int views;
+    private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
