@@ -43,7 +43,8 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public Post findById(Long id) {
-        return postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
+        return postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
     }
 
     @Transactional(readOnly = true)
@@ -85,7 +86,7 @@ public class PostService {
     }
 
     @Transactional
-    public Post update(Long id, Long userId,String title, String content, String image) {
+    public Post update(Long id, Long userId, String title, String content, String image) {
         Post post = findById(id);
         if(!post.getAuthor().getId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 게시물의 게시자가 아닙니다");

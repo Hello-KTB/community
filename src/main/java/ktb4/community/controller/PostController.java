@@ -1,11 +1,13 @@
 package ktb4.community.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import ktb4.community.dto.request.CommentRequestDto;
 import ktb4.community.dto.request.CreatePostRequestDto;
 import ktb4.community.dto.request.UpdatePostRequestDto;
 import ktb4.community.dto.response.*;
 import ktb4.community.entity.Post;
 import ktb4.community.entity.PostLikeId;
+import ktb4.community.service.CommentService;
 import ktb4.community.service.PostLikeService;
 import ktb4.community.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ public class PostController {
 
     private final PostService postService;
     private final PostLikeService postLikeService;
+    private final CommentService commentService;
 
     @PostMapping
     public ResponseEntity<ApiResponseDto> create(HttpServletRequest request, @RequestBody CreatePostRequestDto dto) {
@@ -113,5 +116,44 @@ public class PostController {
                         "좋아요를 취소하셨습니다",
                         dto
                 ));
+    }
+
+    @PostMapping("{id}/comments")
+    public ResponseEntity<ApiResponseDto> createComment(HttpServletRequest request, @PathVariable Long id, @RequestBody CommentRequestDto dto) {
+        Long userId = (Long)request.getAttribute("userId");
+        CommentResponseDto responseDto = commentService.create(id, userId, dto);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(new ApiResponseDto<>(
+                                HttpStatus.CREATED.value(),
+                                true,
+                                "댓글이 등록되었습니다",
+                                responseDto
+                        )
+                );
+    }
+
+    @PatchMapping("{id}/comments/{commentId}")
+    public ResponseEntity<ApiResponseDto> updateComment(HttpServletRequest request, @PathVariable("commentId") Long commentId , @RequestBody CommentRequestDto dto) {
+        Long userId = (Long)request.getAttribute("userId");
+        CommentResponseDto responseDto = commentService.update(commentId, userId, dto);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponseDto<>(
+                                HttpStatus.OK.value(),
+                                true,
+                                "댓글이 수정되었습니다",
+                                responseDto
+                        )
+                );
+    }
+
+    @DeleteMapping("{id}/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(HttpServletRequest request, @PathVariable("commentId") Long commentId) {
+        Long userId = (Long) request.getAttribute("userId");
+        commentService.delete(commentId, userId);
+        return ResponseEntity.noContent().build();
     }
 }
