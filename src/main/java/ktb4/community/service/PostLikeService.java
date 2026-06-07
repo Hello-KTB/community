@@ -39,7 +39,7 @@ public class PostLikeService {
     public PostLikeResponseDto cancelLike(PostLikeId postLikeId) {
         PostLike postLike = findById(postLikeId);
         postLikeRepository.delete(postLike);
-        long likes = postLikeRepository.countByPostLikeId_PostId(postLikeId.getPost_id());
+        long likes = postLikeRepository.countByPostLikeId_PostId(postLikeId.getPostId());
         return new PostLikeResponseDto(false, likes);
     }
 }

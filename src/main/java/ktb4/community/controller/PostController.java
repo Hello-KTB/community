@@ -12,6 +12,7 @@ import ktb4.community.service.PostLikeService;
 import ktb4.community.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -68,6 +69,7 @@ public class PostController {
                         )
                 );
     }
+
 
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponseDto> update(HttpServletRequest request, @PathVariable Long id, @RequestBody UpdatePostRequestDto dto) {
@@ -155,5 +157,18 @@ public class PostController {
         Long userId = (Long) request.getAttribute("userId");
         commentService.delete(commentId, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/comments")
+    public ResponseEntity<ApiResponseDto> getComments(@PathVariable Long id, @RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit) {
+        Slice<CommentResponseDto> comments = commentService.getComments(id, offset, limit);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(new ApiResponseDto<>(
+                        HttpStatus.OK.value(),
+                        true,
+                        "댓글 목록을 조회합니다",
+                        comments
+                ));
     }
 }

@@ -9,6 +9,10 @@ import ktb4.community.repository.CommentRepository;
 import ktb4.community.repository.PostRepository;
 import ktb4.community.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,5 +67,20 @@ public class CommentService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 댓글의 게시자가 아닙니다");
         }
         commentRepository.delete(comment);
+    }
+
+    @Transactional(readOnly = true)
+    public Slice<CommentResponseDto> getComments(Long postId, int page, int size) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
+        Pageable pageable = PageRequest.of(page, size);
+        return commentRepository.findByPostOrderByCreatedAtDesc(post, pageable)
+                .map(comment -> new CommentResponseDto(
+                        comment.getId(),
+                        comment.getAuthor().getNickname(),
+                        comment.getContent(),
+                        comment.getCreatedAt(),
+                        comment.getUpdatedAt()
+                ));
     }
 }

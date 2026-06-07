@@ -80,8 +80,7 @@ public class PostService {
                 0,
                 post.getViews(),
                 post.getCreatedAt(),
-                post.getUpdatedAt(),
-                List.of()
+                post.getUpdatedAt()
         );
     }
 

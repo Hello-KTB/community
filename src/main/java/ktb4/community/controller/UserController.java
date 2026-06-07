@@ -1,5 +1,6 @@
 package ktb4.community.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import ktb4.community.dto.request.CreateUserRequestDto;
 import ktb4.community.dto.request.UpdatePasswordRequestDto;
 import ktb4.community.dto.request.UpdateUserRequestDto;
@@ -37,9 +38,10 @@ public class UserController {
         return ResponseEntity.status(201).build();
     }*/
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponseDto> update(@PathVariable Long id, @RequestBody UpdateUserRequestDto request) {
-        User updatedUser = userService.update(id, request.getNickname(), request.getProfileImage());
+    @PatchMapping("/me")
+    public ResponseEntity<ApiResponseDto> update(HttpServletRequest request, @RequestBody UpdateUserRequestDto dto) {
+        Long userId = (Long) request.getAttribute("userId");
+        User updatedUser = userService.update(userId, dto.getNickname(), dto.getProfileImage());
         return ResponseEntity
                 .status(200)
                 .body(new ApiResponseDto<>(
@@ -50,21 +52,24 @@ public class UserController {
                 ));
     }
 
-    @PatchMapping("/{id}/password")
-    public ResponseEntity<ApiResponseDto> updatePassword(@PathVariable Long id, @RequestBody UpdatePasswordRequestDto request) {
-        User updatedUser = userService.updatePassword(id, request.getPassword(), request.getValidatePassword());
+    @PatchMapping("/me/password")
+    public ResponseEntity<ApiResponseDto> updatePassword(HttpServletRequest request, @RequestBody UpdatePasswordRequestDto dto) {
+        Long userId = (Long) request.getAttribute("userId");
+        User updatedUser = userService.updatePassword(userId, dto.getPassword(), dto.getValidatePassword());
         return ResponseEntity
                 .status(200)
                 .body(new ApiResponseDto<>(
                         200,
                         true,
-                        "회원정보가 수정되었습니다",
-                        new UpdateUserResponseDto(updatedUser.getNickname(), updatedUser.getProfileImage())
+                        "비밀번호가 변경되었습니다",
+                        null
                 ));
     }
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        userService.delete(id);
+    @DeleteMapping("/me")
+    public ResponseEntity delete(HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        userService.delete(userId);
+        return ResponseEntity.noContent().build();
     }
 }

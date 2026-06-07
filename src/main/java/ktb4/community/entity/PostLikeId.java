@@ -11,14 +11,14 @@ import lombok.Setter;
 @EqualsAndHashCode
 public class PostLikeId {
     @Column(name = "post_id")
-    private Long post_id;
+    private Long postId;
     @Column(name = "user_id")
-    private Long user_id;
+    private Long userId;
 
     protected PostLikeId() {}
 
-    public PostLikeId(Long post_id, Long user_id) {
-        this.post_id = post_id;
-        this.user_id = user_id;
+    public PostLikeId(Long postId, Long userId) {
+        this.postId = postId;
+        this.userId = userId;
     }
 }
