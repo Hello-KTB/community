@@ -1,24 +1,33 @@
 spring:
   datasource:
+    # MySQL DB 연결 URL, 3306번 포트(기본 포트), community DB 사용, 서버시간대는 UCT로 설정, SSL 암호화 연경 비활성화
     url: jdbc:mysql://localhost:3306/community?serverTimezone=UTC&useSSL=false
+
+    # DB 접속 계정 정보
     username: root
     password: peterjp0117*
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
+      # 앱 시작 시 테이블 삭제 후 재생성
       ddl-auto: create   # 개발 중에는 create / create-drop / update 중 선택
     properties:
       hibernate:
+        # 실행되는 SQL 쿼리 로그에 포맷팅 후 출력
         format_sql: true
+        # SQL 쿼리에 어떤 JPQL이 생성됐는지 주석을 함꼐 출력
         use_sql_comments: true
 
   jackson:
+    # camelCase(Java) <-> snake_case (JSON) 자동 변환
     property-naming-strategy: SNAKE_CASE
 
   profiles:
+    # 활성화할 스프링 프로파일 지정
     active: dev
 
 logging:
   level:
+    # Hibernate가 실행하는 SQL 쿼리를 DEBUG 레벨로 콘솔에 출력
     org.hibernate.SQL: debug
