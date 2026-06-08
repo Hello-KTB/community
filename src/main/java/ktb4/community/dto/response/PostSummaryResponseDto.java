@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
 public class PostSummaryResponseDto {
     private Long id;
     private String title;
-    private String nickname;
-    private int likes;
-    private int comments;
-    private int views;
+    private AuthorResponseDto author;
+    private int likeCount;
+    private int commentCount;
+    private int viewCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

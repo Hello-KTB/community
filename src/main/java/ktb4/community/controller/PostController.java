@@ -57,7 +57,9 @@ public class PostController {
      * 응답 : 200 OK, 게시물 목록 Slice 반환 (hasNext로 다음 페이지 존재 여부 판단)
      */
     @GetMapping
-    public ResponseEntity<ApiResponseDto> getPosts(@RequestParam(defaultValue = "0") int offset, @RequestParam(defaultValue = "10") int limit) {
+    public ResponseEntity<ApiResponseDto> getPosts(
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int limit) {
         Slice<PostSummaryResponseDto> posts = postService.getPostsWithPaging(offset, limit);
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -65,7 +67,7 @@ public class PostController {
                         HttpStatus.OK.value(),
                         true,
                         "게시물 목록을 조회합니다",
-                        posts
+                        posts.getContent()  // Slice 전체가 아닌 content 배열만 반환
                 ));
     }
 

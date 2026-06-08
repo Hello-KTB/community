@@ -1,10 +1,7 @@
 package ktb4.community.service;
 
 import ktb4.community.dto.request.CreatePostRequestDto;
-import ktb4.community.dto.response.CreatePostResponseDto;
-import ktb4.community.dto.response.PostDetailResponseDto;
-import ktb4.community.dto.response.PostSummaryResponseDto;
-import ktb4.community.dto.response.UpdatePostResponseDto;
+import ktb4.community.dto.response.*;
 import ktb4.community.entity.Post;
 import ktb4.community.entity.User;
 import ktb4.community.repository.PostRepository;
@@ -98,7 +95,7 @@ public class PostService {
         return posts.map(post -> new PostSummaryResponseDto(
                 post.getId(),
                 post.getTitle(),
-                post.getAuthor().getNickname(),
+                new AuthorResponseDto(post.getAuthor().getNickname(), post.getAuthor().getProfileImage()),
                 0,  // 좋아요 수 (추후 구현)
                 0,  // 댓글 수 (추후 구현)
                 post.getViews(),

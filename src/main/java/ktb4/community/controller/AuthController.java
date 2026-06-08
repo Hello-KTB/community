@@ -4,7 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ktb4.community.dto.request.LoginRequestDto;
 import ktb4.community.dto.response.ApiResponseDto;
+import ktb4.community.dto.response.AuthorResponseDto;
 import ktb4.community.dto.response.LoginResponseDto;
+import ktb4.community.entity.User;
 import ktb4.community.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -65,15 +67,14 @@ public class AuthController {
     @GetMapping("/check")
     public ResponseEntity<ApiResponseDto> check(HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
-
-        // userId가 null이면 토큰 없거나 유효하지 않음 → 미로그인 상태
         if (userId == null) {
             return ResponseEntity.status(401)
                     .body(new ApiResponseDto<>(401, false, "로그인이 필요합니다", null));
         }
-
-        // userId가 있으면 로그인 상태
+        User user = authService.getUser(userId);
         return ResponseEntity.ok()
-                .body(new ApiResponseDto<>(200, true, "로그인 상태입니다", null));
+                .body(new ApiResponseDto<>(200, true, "로그인 상태입니다",
+                        new AuthorResponseDto(user.getNickname(), user.getProfileImage())
+                ));
     }
 }

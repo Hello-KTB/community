@@ -20,8 +20,6 @@ spring:
         use_sql_comments: true
 
   jackson:
-    # camelCase(Java) <-> snake_case (JSON) 자동 변환
-    property-naming-strategy: SNAKE_CASE
 
   profiles:
     # 활성화할 스프링 프로파일 지정
