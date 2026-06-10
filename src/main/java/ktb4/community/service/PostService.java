@@ -114,6 +114,7 @@ public class PostService {
      */
     public PostDetailResponseDto getPostDetail(Long id) {
         Post post = findById(id);
+        post.increaseViews();
 
         // 엔티티 → DTO 변환 (지연 로딩 프록시 직렬화 에러 방지)
         return new PostDetailResponseDto(
