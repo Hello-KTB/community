@@ -1,12 +1,12 @@
 package ktb4.community.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import ktb4.community.dto.request.CreateUserRequestDto;
 import ktb4.community.dto.request.UpdatePasswordRequestDto;
 import ktb4.community.dto.request.UpdateUserRequestDto;
 import ktb4.community.dto.response.ApiResponseDto;
 import ktb4.community.dto.response.UpdateUserResponseDto;
-import ktb4.community.entity.User;
 import ktb4.community.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,12 +27,12 @@ public class UserController {
      * POST /v1/users
      * 토큰 불필요 (JwtAuthFilter EXCLUDED_PATHS에 포함)
      *
-     * 요청 바디 : 이메일, 비밀번호, 비밀번호 확인, 닉네임, 프로필 이미지
+     * 요청 바디 : 이메일, 비밀번호, 닉네임, 프로필 이미지
      * 응답 : 201 Created
      */
     @PostMapping
-    public ResponseEntity<ApiResponseDto> create(@RequestBody CreateUserRequestDto request) {
-        userService.create(request);
+    public ResponseEntity<ApiResponseDto> create(@Valid @RequestBody CreateUserRequestDto dto) {
+        userService.create(dto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(new ApiResponseDto<>(
@@ -51,17 +51,17 @@ public class UserController {
      * 응답 : 200 OK, 수정된 닉네임과 프로필 이미지 반환
      */
     @PatchMapping("/me")
-    public ResponseEntity<ApiResponseDto> update(HttpServletRequest request, @RequestBody UpdateUserRequestDto dto) {
+    public ResponseEntity<ApiResponseDto> update(HttpServletRequest request, @Valid @RequestBody UpdateUserRequestDto dto) {
         // 토큰에서 추출한 userId로 수정 대상 회원 식별
         Long userId = (Long) request.getAttribute("userId");
-        User updatedUser = userService.update(userId, dto.getNickname(), dto.getProfileImage());
+        UpdateUserResponseDto updatedUser = userService.update(userId, dto);
         return ResponseEntity
                 .status(200)
                 .body(new ApiResponseDto<>(
                         200,
                         true,
                         "회원정보가 수정되었습니다",
-                        new UpdateUserResponseDto(updatedUser.getNickname(), updatedUser.getProfileImage())
+                        updatedUser
                 ));
     }
 
@@ -70,14 +70,14 @@ public class UserController {
      * PATCH /v1/users/me/password
      * 토큰에서 추출한 userId로 본인 여부 확인
      *
-     * 요청 바디 : 새 비밀번호, 새 비밀번호 확인
+     * 요청 바디 : 새 비밀번호
      * 응답 : 200 OK
      */
     @PatchMapping("/me/password")
-    public ResponseEntity<ApiResponseDto> updatePassword(HttpServletRequest request, @RequestBody UpdatePasswordRequestDto dto) {
+    public ResponseEntity<ApiResponseDto> updatePassword(HttpServletRequest request, @Valid @RequestBody UpdatePasswordRequestDto dto) {
         // 토큰에서 추출한 userId로 수정 대상 회원 식별
         Long userId = (Long) request.getAttribute("userId");
-        userService.updatePassword(userId, dto.getPassword(), dto.getValidatePassword());
+        userService.updatePassword(userId, dto);
         return ResponseEntity
                 .status(200)
                 .body(new ApiResponseDto<>(
