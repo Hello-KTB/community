@@ -1,6 +1,9 @@
 package ktb4.community.service;
 
 import ktb4.community.dto.request.CreateUserRequestDto;
+import ktb4.community.dto.request.UpdatePasswordRequestDto;
+import ktb4.community.dto.request.UpdateUserRequestDto;
+import ktb4.community.dto.response.UpdateUserResponseDto;
 import ktb4.community.entity.User;
 import ktb4.community.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,22 +28,24 @@ public class UserService {
      * 비밀번호를 BCrypt로 암호화한 후 User 엔티티 생성 및 저장
      * new User()로 만든 객체는 비영속 상태이므로 save()를 명시적으로 호출해야 INSERT가 됨
      *
-     * @param createUserRequestDto 이메일, 비밀번호, 닉네임, 프로필 이미지를 담은 요청 DTO
+     * @param dto 이메일, 비밀번호, 닉네임, 프로필 이미지를 담은 요청 DTO
      * @return 저장된 User 엔티티
      */
     @Transactional
-    public User create(CreateUserRequestDto createUserRequestDto) {
+    public void create(CreateUserRequestDto dto) {
+        checkEmail(dto.getEmail()); // 이메일 중복 체크
+        checkNickname(dto.getNickname()); // 닉네임 중복 체크
         // 비밀번호를 BCrypt로 암호화 (평문 저장 방지)
-        String encodedPassword = passwordEncoder.encode(createUserRequestDto.getPassword());
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
 
         User user = new User(
-                createUserRequestDto.getEmail(),
+                dto.getEmail(),
                 encodedPassword,
-                createUserRequestDto.getNickname(),
-                createUserRequestDto.getProfileImage()
+                dto.getNickname(),
+                dto.getProfileImage()
         );
         // 비영속 상태 객체이므로 save() 호출 필요
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
     /**
@@ -64,15 +69,17 @@ public class UserService {
      * 파라미터 : id           수정할 회원 ID
      * 파라미터 : nickname     변경할 닉네임 (null이면 변경하지 않음)
      * 파라미터 : profileImage 변경할 프로필 이미지 (null이면 변경하지 않음)
-     * 반환 : 수정된 User 엔티티
+     * 반환 : UpdateUserResponseDto
      */
     @Transactional
-    public User update(Long id, String nickname, String profileImage) {
+    public UpdateUserResponseDto update(Long id, UpdateUserRequestDto dto) {
         User user = findById(id);
         // null이 아닌 값만 선택적으로 업데이트
-        if (nickname != null) user.updateNickname(nickname);
-        if (profileImage != null) user.updateProfileImage(profileImage);
-        return userRepository.save(user);
+        if (dto.getNickname() != null) user.updateNickname(dto.getNickname());
+        if (dto.getProfileImage() != null) user.updateProfileImage(dto.getProfileImage());
+        userRepository.save(user);
+
+        return new UpdateUserResponseDto(user.getNickname(), user.getProfileImage());
     }
 
     /**
@@ -82,17 +89,16 @@ public class UserService {
      *
      * 파라미터 : id               변경할 회원 ID
      * 파라미터 : password         새 비밀번호
-     * 파라미터 : validatePassword 새 비밀번호 확인
-     * 반환 : 수정된 User 엔티티
      */
     @Transactional
-    public User updatePassword(Long id, String password, String validatePassword) {
+    public void updatePassword(Long id, UpdatePasswordRequestDto dto) {
         User user = findById(id);
-        // 두 값이 모두 존재하고 일치할 때만 변경
-        if (password != null && validatePassword != null && password.equals(validatePassword))
-            // 새 비밀번호를 BCrypt로 암호화 후 저장
-            user.updatePassword(passwordEncoder.encode(password));
-        return userRepository.save(user);
+        // 새 비밀번호가 현재 비밀번호와 같으면 변경 불가
+        if (passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이전 비밀번호와 일치합니다");
+        }
+        user.updatePassword(passwordEncoder.encode(dto.getPassword()));
+        userRepository.save(user);
     }
 
     /**

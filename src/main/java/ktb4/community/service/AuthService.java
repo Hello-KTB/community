@@ -6,6 +6,7 @@ import ktb4.community.entity.User;
 import ktb4.community.jwt.JwtProvider;
 import ktb4.community.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,12 +86,23 @@ public class AuthService {
      * 파라미터 : maxAge  쿠키 유효 시간 (초), 0이면 즉시 만료
      */
     private void addTokenCookie(HttpServletResponse response, String name, String value, int maxAge) {
+        ResponseCookie cookie = ResponseCookie.from(name, value == null ? "" : value)
+                .httpOnly(true)
+                .path("/")
+                .maxAge(maxAge)
+                .sameSite("Lax")
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
+    }
+
+    /*
+    private void addTokenCookie(HttpServletResponse response, String name, String value, int maxAge) {
         Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(maxAge);
         response.addCookie(cookie);
-    }
+    }*/
 
     /**
      * 비밀번호 검증
