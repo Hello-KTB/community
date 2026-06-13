@@ -10,5 +10,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
+    long countByPostId(Long postId);
     Slice<Comment> findByPostOrderByCreatedAtDesc(Post post, Pageable pageable);
 }

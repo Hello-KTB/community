@@ -10,12 +10,15 @@ import java.time.LocalDateTime;
 public class PostDetailResponseDto {
     private Long id;
     private String title;
-    private String author;
+    private String nickname;
+    private String profileImage;
+    private Long writerId;
     private String content;
     private String image;
-    private int likes;
-    private int comment_count;
-    private int views;
+    private boolean isLiked;
+    private long likeCount;
+    private long commentCount;
+    private long viewCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

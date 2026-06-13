@@ -11,9 +11,9 @@ public class PostSummaryResponseDto {
     private Long id;
     private String title;
     private AuthorResponseDto author;
-    private int likeCount;
-    private int commentCount;
-    private int viewCount;
+    private long likeCount;
+    private long commentCount;
+    private long viewCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

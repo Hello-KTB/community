@@ -3,12 +3,16 @@ package ktb4.community.service;
 import ktb4.community.dto.request.CreatePostRequestDto;
 import ktb4.community.dto.response.*;
 import ktb4.community.entity.Post;
+import ktb4.community.entity.PostLikeId;
 import ktb4.community.entity.User;
+import ktb4.community.global.code.ErrorCode;
+import ktb4.community.global.exception.CustomException;
+import ktb4.community.repository.CommentRepository;
+import ktb4.community.repository.PostLikeRepository;
 import ktb4.community.repository.PostRepository;
 import ktb4.community.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,6 +31,8 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
+    private final PostLikeRepository postLikeRepository;
 
     /**
      * 게시물 생성
@@ -42,7 +48,7 @@ public class PostService {
     public CreatePostResponseDto create(Long userId, CreatePostRequestDto request) {
         // userId로 작성자 조회 (없으면 예외)
         User author = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 비영속 상태 객체이므로 save() 호출 필요
         Post post = new Post(author, request.getTitle(), request.getContent(), request.getImage(), LocalDateTime.now(), LocalDateTime.now());
@@ -68,9 +74,9 @@ public class PostService {
      * 반환 : 조회된 Post 엔티티
      * @throws IllegalArgumentException : 존재하지 않는 게시물일 경우
      */
-    public Post findById(Long id) {
-        return postRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
+    public Post findById(Long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
     }
 
     /**
@@ -96,8 +102,8 @@ public class PostService {
                 post.getId(),
                 post.getTitle(),
                 new AuthorResponseDto(post.getAuthor().getNickname(), post.getAuthor().getProfileImage()),
-                0,  // 좋아요 수 (추후 구현)
-                0,  // 댓글 수 (추후 구현)
+                postLikeRepository.countByPostLikeId_PostId(post.getId()),
+                commentRepository.countByPostId(post.getId()),
                 post.getViews(),
                 post.getCreatedAt(),
                 post.getUpdatedAt()
@@ -112,18 +118,23 @@ public class PostService {
      * 파라미터 : id 조회할 게시물 ID
      * 반환 : PostDetailResponseDto
      */
-    public PostDetailResponseDto getPostDetail(Long id) {
-        Post post = findById(id);
+    @Transactional
+    public PostDetailResponseDto getPostDetail(Long postId, Long userId) {
+        Post post = findById(postId);
+        post.increaseViews();
 
         // 엔티티 → DTO 변환 (지연 로딩 프록시 직렬화 에러 방지)
         return new PostDetailResponseDto(
                 post.getId(),
                 post.getTitle(),
                 post.getAuthor().getNickname(),
+                post.getAuthor().getProfileImage(),
+                post.getAuthor().getId(),
                 post.getContent(),
                 post.getImage(),
-                0,  // 좋아요 수 (추후 구현)
-                0,  // 댓글 수 (추후 구현)
+                postLikeRepository.existsByPostLikeId(new PostLikeId(postId, userId)),
+                postLikeRepository.countByPostLikeId_PostId(postId),
+                commentRepository.countByPostId(postId),
                 post.getViews(),
                 post.getCreatedAt(),
                 post.getUpdatedAt()
@@ -145,15 +156,15 @@ public class PostService {
      * @throws ResponseStatusException : 작성자가 아닐 경우 403
      */
     @Transactional
-    public UpdatePostResponseDto update(Long id, Long userId, String title, String content, String image) {
-        Post post = findById(id);
+    public UpdatePostResponseDto update(Long postId, Long userId, String title, String content, String image) {
+        Post post = findById(postId);
         // 작성자 본인 여부 검증
         if (!post.getAuthor().getId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 게시물의 게시자가 아닙니다");
+            throw new CustomException(ErrorCode.POST_UPDATE_FORBIDDEN);
         }
         // 셋 다 null이면 수정할 내용 없음 → 400
         if (title == null && content == null && image == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "게시물을 수정하세요");
+            throw new CustomException(ErrorCode.INVALID_INPUT);
         }
         // 도메인 메서드를 통해 수정 (updatedAt 자동 갱신)
         post.update(title, content, image);
@@ -178,11 +189,11 @@ public class PostService {
      * @throws ResponseStatusException : 작성자가 아닐 경우 403
      */
     @Transactional
-    public void delete(Long id, Long userId) {
-        Post post = findById(id);
+    public void delete(Long postId, Long userId) {
+        Post post = findById(postId);
         // 작성자 본인 여부 검증
         if (!post.getAuthor().getId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 게시물의 게시자가 아닙니다");
+            throw new CustomException(ErrorCode.POST_DELETE_FORBIDDEN);
         }
         postRepository.delete(post);
     }
