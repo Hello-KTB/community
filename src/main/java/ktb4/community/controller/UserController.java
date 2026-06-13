@@ -2,6 +2,7 @@ package ktb4.community.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import ktb4.community.global.code.SuccessCode;
 import ktb4.community.dto.request.CreateUserRequestDto;
 import ktb4.community.dto.request.UpdatePasswordRequestDto;
 import ktb4.community.dto.request.UpdateUserRequestDto;
@@ -9,7 +10,6 @@ import ktb4.community.dto.response.ApiResponseDto;
 import ktb4.community.dto.response.UpdateUserResponseDto;
 import ktb4.community.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,12 +34,8 @@ public class UserController {
     public ResponseEntity<ApiResponseDto> create(@Valid @RequestBody CreateUserRequestDto dto) {
         userService.create(dto);
         return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(new ApiResponseDto<>(
-                        HttpStatus.CREATED.value(),
-                        true,
-                        "회원가입에 성공하셨습니다",
-                        null));
+                .status(SuccessCode.SIGNUP_SUCCESS.getStatus())
+                .body(ApiResponseDto.success(null, SuccessCode.SIGNUP_SUCCESS));
     }
 
     /**
@@ -55,14 +51,7 @@ public class UserController {
         // 토큰에서 추출한 userId로 수정 대상 회원 식별
         Long userId = (Long) request.getAttribute("userId");
         UpdateUserResponseDto updatedUser = userService.update(userId, dto);
-        return ResponseEntity
-                .status(200)
-                .body(new ApiResponseDto<>(
-                        200,
-                        true,
-                        "회원정보가 수정되었습니다",
-                        updatedUser
-                ));
+        return ResponseEntity.ok(ApiResponseDto.success(updatedUser, SuccessCode.UPDATE_USER_SUCCESS));
     }
 
     /**
@@ -78,14 +67,7 @@ public class UserController {
         // 토큰에서 추출한 userId로 수정 대상 회원 식별
         Long userId = (Long) request.getAttribute("userId");
         userService.updatePassword(userId, dto);
-        return ResponseEntity
-                .status(200)
-                .body(new ApiResponseDto<>(
-                        200,
-                        true,
-                        "비밀번호가 변경되었습니다",
-                        null
-                ));
+        return ResponseEntity.ok(ApiResponseDto.success(null, SuccessCode.UPDATE_PASSWORD_SUCCESS));
     }
 
     /**
@@ -116,14 +98,7 @@ public class UserController {
     @GetMapping("/email/check")
     public ResponseEntity<ApiResponseDto> checkEmail(@RequestParam String email) {
         userService.checkEmail(email);
-        return ResponseEntity
-                .status(200)
-                .body(new ApiResponseDto<>(
-                        200,
-                        true,
-                        "사용 가능한 이메일입니다",
-                        null
-                ));
+        return ResponseEntity.ok(ApiResponseDto.success(null, SuccessCode.CHECK_EMAIL_SUCCESS));
     }
 
     /**
@@ -138,13 +113,6 @@ public class UserController {
     @GetMapping("/nickname/check")
     public ResponseEntity<ApiResponseDto> checkNickname(@RequestParam String nickname) {
         userService.checkNickname(nickname);
-        return ResponseEntity
-                .status(200)
-                .body(new ApiResponseDto<>(
-                        200,
-                        true,
-                        "사용 가능한 닉네임입니다",
-                        null
-                ));
+        return ResponseEntity.ok(ApiResponseDto.success(null, SuccessCode.CHECK_NICKNAME_SUCCESS));
     }
 }

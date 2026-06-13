@@ -38,14 +38,14 @@ public class PostController {
     public ResponseEntity<ApiResponseDto> create(HttpServletRequest request, @RequestBody CreatePostRequestDto dto) {
         // 토큰에서 추출한 userId로 작성자 식별
         Long id = (Long) request.getAttribute("userId");
-        CreatePostResponseDto post = postService.create(id, dto);
+        CreatePostResponseDto newPost = postService.create(id, dto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(new ApiResponseDto<>(
                         HttpStatus.CREATED.value(),
                         true,
                         "게시물이 등록되었습니다",
-                        post
+                        newPost
                 ));
     }
 

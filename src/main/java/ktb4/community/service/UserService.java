@@ -5,13 +5,13 @@ import ktb4.community.dto.request.UpdatePasswordRequestDto;
 import ktb4.community.dto.request.UpdateUserRequestDto;
 import ktb4.community.dto.response.UpdateUserResponseDto;
 import ktb4.community.entity.User;
+import ktb4.community.global.code.ErrorCode;
+import ktb4.community.global.exception.CustomException;
 import ktb4.community.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 // 회원 관련 비즈니스 로직을 처리하는 서비스 계층
 @Service
@@ -54,11 +54,11 @@ public class UserService {
      *
      * 파라미터 : id 조회할 회원 ID
      * 반환 :  조회된 User 엔티티
-     * @throws IllegalArgumentException : 존재하지 않는 회원일 경우
+     * @throws CustomException
      */
     public User findById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다"));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
     /**
@@ -74,8 +74,15 @@ public class UserService {
     @Transactional
     public UpdateUserResponseDto update(Long id, UpdateUserRequestDto dto) {
         User user = findById(id);
+
         // null이 아닌 값만 선택적으로 업데이트
-        if (dto.getNickname() != null) user.updateNickname(dto.getNickname());
+        if (dto.getNickname() != null) {
+            // 현재 닉네임과 희망 닉네임이 다를 경우에 중복 체크 후 업데이트
+            if(!dto.getNickname().equals(user.getNickname())) {
+                checkNickname(dto.getNickname()); // 닉네임 중복 체크
+            }
+            user.updateNickname(dto.getNickname());
+        }
         if (dto.getProfileImage() != null) user.updateProfileImage(dto.getProfileImage());
         userRepository.save(user);
 
@@ -95,7 +102,7 @@ public class UserService {
         User user = findById(id);
         // 새 비밀번호가 현재 비밀번호와 같으면 변경 불가
         if (passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이전 비밀번호와 일치합니다");
+            throw new CustomException(ErrorCode.SAME_AS_CURRENT_PASSWORD);
         }
         user.updatePassword(passwordEncoder.encode(dto.getPassword()));
         userRepository.save(user);
@@ -119,11 +126,11 @@ public class UserService {
      * 회원가입 시 이메일 입력 단계에서 실시간으로 호출됨
      *
      * 파라미터 : email 중복 체크할 이메일
-     * @throws ResponseStatusException : 이미 존재하는 이메일일 경우 409
+     * @throws CustomException
      */
     public void checkEmail(String email) {
         if (userRepository.existsByEmail(email)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다");
+            throw new CustomException(ErrorCode.ALREADY_EXIST_EMAIL);
         }
     }
 
@@ -133,11 +140,11 @@ public class UserService {
      * 회원가입 시 닉네임 입력 단계에서 실시간으로 호출됨
      *
      * 파라미터 : nickname 중복 체크할 닉네임
-     * @throws ResponseStatusException : 이미 존재하는 닉네임일 경우 409
+     * @throws CustomException
      */
     public void checkNickname(String nickname) {
         if (userRepository.existsByNickname(nickname)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 닉네임입니다");
+            throw new CustomException(ErrorCode.ALREADY_EXIST_NICKNAME);
         }
     }
 }
