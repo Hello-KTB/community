@@ -8,12 +8,16 @@ import ktb4.community.dto.response.*;
 import ktb4.community.entity.PostLikeId;
 import ktb4.community.global.code.SuccessCode;
 import ktb4.community.service.CommentService;
+import ktb4.community.service.ImageService;
 import ktb4.community.service.PostLikeService;
 import ktb4.community.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 // 게시물 관련 HTTP 요청을 처리하는 컨트롤러
 // /v1/posts 하위 URI를 담당 (게시물, 댓글, 좋아요 포함)
@@ -25,6 +29,7 @@ public class PostController {
     private final PostService postService;
     private final PostLikeService postLikeService;
     private final CommentService commentService;
+    private final ImageService imageService;
 
     /**
      * 게시물 생성
@@ -212,5 +217,14 @@ public class PostController {
         return ResponseEntity
                 .status(SuccessCode.GET_COMMENTS_SUCCESS.getStatus())
                 .body(ApiResponseDto.success(comments.getContent(), SuccessCode.GET_COMMENTS_SUCCESS));
+    }
+
+    @PostMapping("/upload/attach-file")
+    public ResponseEntity<ApiResponseDto> uploadPostImage(@RequestParam("postFile") MultipartFile file) {
+        String url = imageService.uploadImage(file, "POST");
+
+        return ResponseEntity.ok(ApiResponseDto.success(
+                Map.of("fileUrl", url),
+                SuccessCode.IMAGE_UPLOAD_SUCCESS));
     }
 }

@@ -8,10 +8,14 @@ import ktb4.community.dto.request.UpdatePasswordRequestDto;
 import ktb4.community.dto.request.UpdateUserRequestDto;
 import ktb4.community.dto.response.ApiResponseDto;
 import ktb4.community.dto.response.UpdateUserResponseDto;
+import ktb4.community.service.ImageService;
 import ktb4.community.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 // 회원 관련 HTTP 요청을 처리하는 컨트롤러
 // /v1/users 하위 URI를 담당
@@ -21,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final ImageService imageService;
 
     /**
      * 회원가입
@@ -114,5 +119,14 @@ public class UserController {
     public ResponseEntity<ApiResponseDto> checkNickname(@RequestParam String nickname) {
         userService.checkNickname(nickname);
         return ResponseEntity.ok(ApiResponseDto.success(null, SuccessCode.CHECK_NICKNAME_SUCCESS));
+    }
+
+    @PostMapping("/upload/profile-image")
+    public ResponseEntity<ApiResponseDto> uploadProfileImage(@RequestParam("profileImage") MultipartFile file) {
+        String url = imageService.uploadImage(file, "PROFILE");
+
+        return ResponseEntity.ok(ApiResponseDto.success(
+                Map.of("profileImageUrl", url),
+                SuccessCode.IMAGE_UPLOAD_SUCCESS));
     }
 }

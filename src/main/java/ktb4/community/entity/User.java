@@ -36,11 +36,11 @@ public class User {
     private String profileImage;
 
     // 생성 시점
-    @Column(name = "user_createdAt")
+    @Column(name = "user_createdAt", nullable = false)
     private LocalDateTime createdAt;
 
     // 수정 시간
-    @Column(name = "user_updatedAt")
+    @Column(name = "user_updatedAt",  nullable = false)
     private LocalDateTime updatedAt;
 
     /**

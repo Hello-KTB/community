@@ -31,7 +31,11 @@ public enum ErrorCode {
     // 댓글 관련 에러
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다"),
     COMMENT_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "댓글 수정 권한이 없습니다"),
-    COMMENT_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "댓글 삭제 권한이 없습니다");
+    COMMENT_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "댓글 삭제 권한이 없습니다"),
+
+    // 이미지
+    IMAGE_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드에 실패하셨습니다"),
+    INVALID_FILE(HttpStatus.BAD_REQUEST, "유효하지 않은 파일입니다");
 
     // 기본 필드
     private final HttpStatus status;

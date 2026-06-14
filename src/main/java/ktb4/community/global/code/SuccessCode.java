@@ -26,7 +26,10 @@ public enum SuccessCode {
     // 댓글
     CREATE_COMMENT_SUCCESS(HttpStatus.CREATED, "댓글을 등록했습니다"),
     UPDATE_COMMENT_SUCCESS(HttpStatus.OK, "댓글이 수정되었습니다"),
-    GET_COMMENTS_SUCCESS(HttpStatus.OK, "댓글 목록을 조회합니다");
+    GET_COMMENTS_SUCCESS(HttpStatus.OK, "댓글 목록을 조회합니다"),
+
+    // 이미지
+    IMAGE_UPLOAD_SUCCESS(HttpStatus.OK, "이미지 업로드에 성공하셨습니다");
 
     private final HttpStatus status;
     private final String message;
