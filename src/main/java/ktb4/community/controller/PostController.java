@@ -58,7 +58,7 @@ public class PostController {
         Slice<PostSummaryResponseDto> posts = postService.getPostsWithPaging(offset, limit);
         return ResponseEntity
                 .status(SuccessCode.GET_POSTS_SUCCESS.getStatus())
-                .body(ApiResponseDto.success(posts, SuccessCode.GET_POSTS_SUCCESS));
+                .body(ApiResponseDto.success(posts.getContent(), SuccessCode.GET_POSTS_SUCCESS));
     }
 
     /**
@@ -211,6 +211,6 @@ public class PostController {
         Slice<CommentResponseDto> comments = commentService.getComments(postId, offset, limit);
         return ResponseEntity
                 .status(SuccessCode.GET_COMMENTS_SUCCESS.getStatus())
-                .body(ApiResponseDto.success(comments, SuccessCode.GET_COMMENTS_SUCCESS));
+                .body(ApiResponseDto.success(comments.getContent(), SuccessCode.GET_COMMENTS_SUCCESS));
     }
 }

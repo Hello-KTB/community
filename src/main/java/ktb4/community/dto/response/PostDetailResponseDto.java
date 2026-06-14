@@ -15,7 +15,7 @@ public class PostDetailResponseDto {
     private Long writerId;
     private String content;
     private String image;
-    private boolean isLiked;
+    private Boolean isLiked;
     private long likeCount;
     private long commentCount;
     private long viewCount;
