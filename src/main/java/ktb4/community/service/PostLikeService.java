@@ -3,9 +3,10 @@ package ktb4.community.service;
 import ktb4.community.dto.response.PostLikeResponseDto;
 import ktb4.community.entity.PostLike;
 import ktb4.community.entity.PostLikeId;
+import ktb4.community.global.code.ErrorCode;
+import ktb4.community.global.exception.CustomException;
 import ktb4.community.repository.PostLikeRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -26,11 +27,11 @@ public class PostLikeService {
      *
      * 파라미터 : postLikeId (postId + userId) 복합키
      * 반환 : 조회된 PostLike 엔티티
-     * @throws ResponseStatusException : 존재하지 않는 좋아요일 경우 404
+     * @throws CustomException : 존재하지 않는 좋아요일 경우 (LIKE_NOT_FOUND)
      */
     public PostLike findById(PostLikeId postLikeId) {
         return postLikeRepository.findById(postLikeId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 좋아요입니다"));
+                .orElseThrow(() -> new CustomException(ErrorCode.LIKE_NOT_FOUND));
     }
 
     /**
@@ -42,7 +43,7 @@ public class PostLikeService {
      * 파라미터 : post_id 좋아요를 누를 게시물 ID
      * 파라미터 : user_id 토큰에서 추출한 요청자 ID
      * 반환 : isLiked(true)와 현재 좋아요 수를 담은 PostLikeResponseDto
-     * @throws ResponseStatusException 이미 좋아요를 누른 경우 409
+     * @throws CustomException : 이미 좋아요를 누른 경우 (ALREADY_LIKED)
      */
     @Transactional
     public PostLikeResponseDto pressLike(Long post_id, Long user_id) {
@@ -50,7 +51,7 @@ public class PostLikeService {
 
         // 중복 좋아요 방지 (DB 복합키로도 막히지만 명시적으로 검증)
         if (postLikeRepository.existsByPostLikeId(postLike.getPostLikeId())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 좋아요를 눌렀습니다");
+            throw new CustomException(ErrorCode.ALREADY_LIKED);
         }
         // 비영속 상태 객체이므로 save() 호출 필요
         postLikeRepository.save(postLike);
@@ -67,7 +68,7 @@ public class PostLikeService {
      *
      * 파라미터 : postLikeId (postId + userId) 복합키
      * 반환 : isLiked(false)와 현재 좋아요 수를 담은 PostLikeResponseDto
-     * @throws ResponseStatusException 좋아요가 존재하지 않을 경우 404
+     * @throws CustomException : 좋아요가 존재하지 않을 경우 (LIKE_NOT_FOUND)
      */
     @Transactional
     public PostLikeResponseDto cancelLike(PostLikeId postLikeId) {

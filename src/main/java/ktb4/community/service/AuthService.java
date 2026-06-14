@@ -1,6 +1,5 @@
 package ktb4.community.service;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import ktb4.community.entity.User;
 import ktb4.community.jwt.JwtProvider;
@@ -94,15 +93,6 @@ public class AuthService {
                 .build();
         response.addHeader("Set-Cookie", cookie.toString());
     }
-
-    /*
-    private void addTokenCookie(HttpServletResponse response, String name, String value, int maxAge) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(maxAge);
-        response.addCookie(cookie);
-    }*/
 
     /**
      * 비밀번호 검증

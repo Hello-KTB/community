@@ -5,6 +5,8 @@ import ktb4.community.dto.response.CommentResponseDto;
 import ktb4.community.entity.Comment;
 import ktb4.community.entity.Post;
 import ktb4.community.entity.User;
+import ktb4.community.global.code.ErrorCode;
+import ktb4.community.global.exception.CustomException;
 import ktb4.community.repository.CommentRepository;
 import ktb4.community.repository.PostRepository;
 import ktb4.community.repository.UserRepository;
@@ -12,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -40,21 +41,21 @@ public class CommentService {
      * 파라미터 : userId  토큰에서 추출한 작성자 ID
      * 파라미터 : request 댓글 내용을 담은 요청 DTO
      * 반환 : 저장된 댓글 정보를 담은 CommentResponseDto
-     * @throws IllegalArgumentException : 존재하지 않는 회원 또는 게시물일 경우
+     * @throws CustomException : 존재하지 않는 회원 또는 게시물일 경우
      */
     @Transactional
     public CommentResponseDto create(Long postId, Long userId, CommentRequestDto request) {
         // userId로 작성자 조회 (없으면 예외)
         User author = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다"));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // postId로 게시물 조회 (없으면 예외)
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
         // 내용이 없으면 생성 불가
         if (request.getContent() == null || request.getContent().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "댓글을 입력하세요");
+            throw new CustomException(ErrorCode.INVALID_INPUT);
         }
 
         // 비영속 상태 객체이므로 save() 호출 필요
@@ -64,6 +65,7 @@ public class CommentService {
         // 엔티티 → DTO 변환 후 반환
         return new CommentResponseDto(
                 comment.getId(),
+                comment.getPost().getId(),
                 comment.getAuthor().getNickname(),
                 comment.getContent(),
                 comment.getCreatedAt(),
@@ -77,11 +79,11 @@ public class CommentService {
      *
      * 파라미터 : id 조회할 댓글 ID
      * 반환 : 조회된 Comment 엔티티
-     * @throws IllegalArgumentException : 존재하지 않는 댓글일 경우
+     * @throws CustomException : 존재하지 않는 댓글일 경우
      */
     public Comment findById(Long id) {
         return commentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다"));
+                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
     }
 
     /**
@@ -94,18 +96,18 @@ public class CommentService {
      * 파라미터 : userId  토큰에서 추출한 요청자 ID (작성자 검증용)
      * 파라미터 : request 변경할 댓글 내용을 담은 요청 DTO
      * 반환 : 수정된 댓글 정보를 담은 CommentResponseDto
-     * @throws ResponseStatusException : 작성자가 아닐 경우 403
+     * @throws CustomException : 작성자가 아닐 경우
      */
     @Transactional
     public CommentResponseDto update(Long id, Long userId, CommentRequestDto request) {
         Comment comment = findById(id);
         // 작성자 본인 여부 검증
         if (!comment.getAuthor().getId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 댓글의 게시자가 아닙니다");
+            throw new CustomException(ErrorCode.COMMENT_UPDATE_FORBIDDEN);
         }
         // 내용이 없으면 수정 불가
         if (request.getContent() == null || request.getContent().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "댓글을 수정하세요");
+            throw new CustomException(ErrorCode.INVALID_INPUT);
         }
         // 도메인 메서드를 통해 수정 (updatedAt 자동 갱신)
         comment.updateContent(request.getContent());
@@ -113,6 +115,7 @@ public class CommentService {
         // 엔티티 → DTO 변환 후 반환
         return new CommentResponseDto(
                 comment.getId(),
+                comment.getPost().getId(),
                 comment.getAuthor().getNickname(),
                 comment.getContent(),
                 comment.getCreatedAt(),
@@ -133,7 +136,7 @@ public class CommentService {
         Comment comment = findById(id);
         // 작성자 본인 여부 검증
         if (!comment.getAuthor().getId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 댓글의 게시자가 아닙니다");
+            throw new CustomException(ErrorCode.COMMENT_DELETE_FORBIDDEN);
         }
         commentRepository.delete(comment);
     }
@@ -153,13 +156,14 @@ public class CommentService {
     public Slice<CommentResponseDto> getComments(Long postId, int page, int size) {
         // postId로 게시물 조회 (없으면 예외)
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
         Pageable pageable = PageRequest.of(page, size);
 
         // 엔티티 → DTO 변환 (지연 로딩 프록시 직렬화 에러 방지)
         return commentRepository.findByPostOrderByCreatedAtDesc(post, pageable)
                 .map(comment -> new CommentResponseDto(
                         comment.getId(),
+                        comment.getPost().getId(),
                         comment.getAuthor().getNickname(),
                         comment.getContent(),
                         comment.getCreatedAt(),
