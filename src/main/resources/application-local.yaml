@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    # 로컬 MySQL 연결 URL, 3306번 포트(기본 포트), community DB 사용
+    # 서버 시간대는 UTC로 설정, SSL 암호화 연결 비활성화, RSA 공개키 조회 허용
+    url: jdbc:mysql://localhost:3306/community?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    # 로컬 DB 접속 계정 정보
+    username: root
+    password: peterjp0117*
+
+  jpa:
+    hibernate:
+      # 로컬 개발 중에는 앱 시작 시 테이블 삭제 후 재생성
+      # 필요에 따라 create / create-drop / update 중 선택
+      ddl-auto: create
+
+# 로컬 환경 파일 업로드 경로
+file:
+  path: /Users/peterj/study/KTB/upload
