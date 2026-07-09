@@ -29,9 +29,7 @@ jobs:
       # 3. Gradle 권한 부여 (오타 수정 및 하위 폴더 반영)
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-        working-directory: community
 
       # 4. 빌드 실행 (테스트 제외 옵션 '-x test' 추가)
       - name: Build with Gradle
         run: ./gradlew clean build -x test
-        working-directory: community
