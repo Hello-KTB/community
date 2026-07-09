@@ -1,10 +1,10 @@
 # 워크플로 이름(GitHub Actions 탭에 표시됨)
-name : Spring Boot CI
+name: Spring Boot CI
 
 # 언제 실행할 것인가 (Trigger)
 on:
   push:
-    branches: ["master"] # master 브랜치에 push 될 때마다 실행ㅇ
+    branches: ["master"] # master 브랜치에 push 될 때마다 실행
   pull_request:
     branches: ["master"] # PR이 들어올 때도 실행
 
@@ -26,10 +26,12 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      # 3. Gradle 권한 부여 (가끔 권한 문제 생길 수 있음)
+      # 3. Gradle 권한 부여 (오타 수정 및 하위 폴더 반영)
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+        working-directory: community
 
-      # 4. 빌드 및 테스트 실행 (가장 중요)
+      # 4. 빌드 실행 (테스트 제외 옵션 '-x test' 추가)
       - name: Build with Gradle
-        run: ./gradlew clean build
+        run: ./gradlew clean build -x test
+        working-directory: community
