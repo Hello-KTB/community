@@ -43,7 +43,6 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 	implementation 'org.springframework.security:spring-security-crypto:6.3.3'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
 
 	/**
 	 * 유효성 검증을 위한 의존성
