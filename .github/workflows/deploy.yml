@@ -54,7 +54,7 @@ jobs:
             "docker pull peterj0117/community-backend:latest",
             "docker stop community-backend || true",
             "docker rm community-backend || true",
-            "docker run -d --name community-backend --restart always -p 8080:8080 -e PROFILE=prod peterj0117/community-backend:latest"
+            "docker run -d --name community-backend --restart always -p 8080:8080 -e PROFILE=prod -e DB_URL=${{ secrets.DB_URL }} -e DB_USERNAME=${{ secrets.DB_USERNAME }} -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} peterj0117/community-backend:latest"
             ]' \
             --query "Command.CommandId" \
             --output text)
@@ -82,7 +82,7 @@ jobs:
             "docker pull peterj0117/community-backend:latest",
             "docker stop community-backend || true",
             "docker rm community-backend || true",
-            "docker run -d --name community-backend --restart always -p 8080:8080 -e PROFILE=prod peterj0117/community-backend:latest"
+            "docker run -d --name community-backend --restart always -p 8080:8080 -e PROFILE=prod -e DB_URL=${{ secrets.DB_URL }} -e DB_USERNAME=${{ secrets.DB_USERNAME }} -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} peterj0117/community-backend:latest"
             ]' \
             --query "Command.CommandId" \
             --output text)
