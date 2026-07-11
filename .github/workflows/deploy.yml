@@ -1,35 +1,199 @@
 # 워크플로 이름(GitHub Actions 탭에 표시됨)
-name: Spring Boot CI
+name: Spring Boot CI/CD
 
 # 언제 실행할 것인가 (Trigger)
 on:
   push:
     branches: ["master"] # master 브랜치에 push 될 때마다 실행
-  pull_request:
-    branches: ["master"] # PR이 들어올 때도 실행
 
 # 할 일 목록 (Jobs)
 jobs:
-  build:
+  build-and-deploy:
     # 실행 환경 (리눅스 우분투 최신 버전)
     runs-on: ubuntu-latest
 
     # 실행 단계 (Steps)
     steps:
       # 1. 내 코드 내려받기
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # 2. 자바 설치하기 (JDK 21)
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      # 2. Docker Hub 로그인
+      - name: Login To Docker Hub
+        uses: docker/login-action@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 3. Gradle 권한 부여 (오타 수정 및 하위 폴더 반영)
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      # 3. Docker 이미지 빌드 & Push
+      - name: Build and push Dokcer image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true# 워크플로 이름(GitHub Actions 탭에 표시됨)
+name: Spring Boot CI/CD
 
-      # 4. 빌드 실행 (테스트 제외 옵션 '-x test' 추가)
-      - name: Build with Gradle
-        run: ./gradlew clean build -x test
+# 언제 실행할 것인가 (Trigger)
+on:
+  push:
+    branches: ["master"] # master 브랜치에 push 될 때마다 실행
+
+# 할 일 목록 (Jobs)
+jobs:
+  build-and-deploy:
+    # 실행 환경 (리눅스 우분투 최신 버전)
+    runs-on: ubuntu-latest
+
+    # 실행 단계 (Steps)
+    steps:
+      # 1. 내 코드 내려받기
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Docker Hub 로그인
+      - name: Login To Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 3. Docker 이미지 빌드 & Push
+      - name: Build and push Dokcer image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: peterj0117/community-backend:latest
+          build-args:
+            PROFILE=prod
+
+      # 4. AWS 인증
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      # 5 Backend-A 배포
+      - name: Deploy to Backend-A
+        id: deploy_a
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids ${{ secrets.AWS_INSTANCE_ID_A }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=[
+            "docker pull peterj0117/community-backend:latest",
+            "docker stop community-backend || true",
+            "docker rm community-backend || true",
+            "docker run -d --name community-backend --restart always -p 8080:8080 -e PROFILE=prod peterj0117/community-backend:latest"
+            ]' \
+            --query "Command.CommandId" \
+            --output text)
+            echo "command_id=$COMMAND_ID" >> $GITHUB_OUTPUT
+
+      # 6. Backend-A 배포 결과 확인
+      - name: Check Backend-A deployment
+        run: |
+          sleep 30s
+          aws ssm list-command-invocations \
+            --details \
+            --instance-id ${{ secrets.AWS_INSTANCE_ID_A }} \
+            --command-id "${{ steps.deploy_a.outputs.command_id }}" \
+            --query "CommandInvocations[].CommandPlugins[].{Status:Status,Output:Output}" \
+            --output table
+
+      # 7 Backend-B 배포
+      - name: Deploy to Backend-B
+        id: deploy_b
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids ${{ secrets.AWS_INSTANCE_ID_B }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=[
+            "docker pull peterj0117/community-backend:latest",
+            "docker stop community-backend || true",
+            "docker rm community-backend || true",
+            "docker run -d --name community-backend --restart always -p 8080:8080 -e PROFILE=prod peterj0117/community-backend:latest"
+            ]' \
+            --query "Command.CommandId" \
+            --output text)
+            echo "command_id=$COMMAND_ID" >> $GITHUB_OUTPUT
+
+      # 8. Backend-B 배포 결과 확인
+      - name: Check Backend-B deployment
+        run: |
+          sleep 30s
+          aws ssm list-command-invocations \
+            --details \
+            --instance-id ${{ secrets.AWS_INSTANCE_ID_B }} \
+            --command-id "${{ steps.deploy_b.outputs.command_id }}" \
+            --query "CommandInvocations[].CommandPlugins[].{Status:Status,Output:Output}" \
+            --output table
+          tags: peterj0117/community-backend:latest
+          build-args:
+            PROFILE=prod
+
+      # 4. AWS 인증
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      # 5 Backend-A 배포
+      - name: Deploy to Backend-A
+        id: deploy_a
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids ${{ secrets.AWS_INSTANCE_ID_A }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=[
+            "docker pull peterj0117/community-backend:latest",
+            "docker stop community-backend || true",
+            "docker rm community-backend || true",
+            "docker run -d --name community-backend --restart always -p 8080:8080 -e PROFILE=prod peterj0117/community-backend:latest"
+            ]' \
+            --query "Command.CommandId" \
+            --output text)
+            echo "command_id=$COMMAND_ID" >> $GITHUB_OUTPUT
+
+      # 6. Backend-A 배포 결과 확인
+      - name: Check Backend-A deployment
+        run: |
+          sleep 30s
+          aws ssm list-command-invocations \
+            --details \
+            --instance-id ${{ secrets.AWS_INSTANCE_ID_A }} \
+            --command-id "${{ steps.deploy_a.outputs.command_id }}" \
+            --query "CommandInvocations[].CommandPlugins[].{Status:Status,Output:Output}" \
+            --output table
+          
+      # 7 Backend-B 배포
+      - name: Deploy to Backend-B
+        id: deploy_b
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids ${{ secrets.AWS_INSTANCE_ID_B }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=[
+            "docker pull peterj0117/community-backend:latest",
+            "docker stop community-backend || true",
+            "docker rm community-backend || true",
+            "docker run -d --name community-backend --restart always -p 8080:8080 -e PROFILE=prod peterj0117/community-backend:latest"
+            ]' \
+            --query "Command.CommandId" \
+            --output text)
+            echo "command_id=$COMMAND_ID" >> $GITHUB_OUTPUT
+
+      # 8. Backend-B 배포 결과 확인
+      - name: Check Backend-B deployment
+        run: |
+          sleep 30s
+          aws ssm list-command-invocations \
+            --details \
+            --instance-id ${{ secrets.AWS_INSTANCE_ID_B }} \
+            --command-id "${{ steps.deploy_b.outputs.command_id }}" \
+            --query "CommandInvocations[].CommandPlugins[].{Status:Status,Output:Output}" \
+            --output table
