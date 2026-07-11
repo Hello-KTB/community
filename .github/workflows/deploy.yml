@@ -46,20 +46,11 @@ jobs:
       # 5. Backend-A 배포
       - name: Deploy to Backend-A
         id: deploy_a
-        env:
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
-          PARAMS=$(cat <<EOF
-          {"commands":["docker pull $DOCKER_USERNAME/community-backend:latest","docker stop community-backend || true","docker rm community-backend || true","docker run -d --name community-backend --restart always -p 8080:8080 -e PROFILE=prod -e DB_URL=$DB_URL -e DB_USERNAME=$DB_USERNAME -e DB_PASSWORD=$DB_PASSWORD $DOCKER_USERNAME/community-backend:latest"]}
-          EOF
-          )
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids ${{ secrets.AWS_INSTANCE_ID_A }} \
             --document-name "AWS-RunShellScript" \
-            --parameters "$PARAMS" \
+            --parameters '{"commands":["docker pull peterj0117/community-backend:latest","docker stop community-backend || true","docker rm community-backend || true","docker run -d --name community-backend --restart always -p 8080:8080 -e PROFILE=prod -e DB_URL=jdbc:mysql://10.0.5.94:3306/community?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true -e DB_USERNAME=community -e DB_PASSWORD=Peterjp0117* peterj0117/community-backend:latest"]}' \
             --query "Command.CommandId" \
             --output text)
           echo "command_id=$COMMAND_ID" >> $GITHUB_OUTPUT
@@ -78,20 +69,11 @@ jobs:
       # 7. Backend-B 배포
       - name: Deploy to Backend-B
         id: deploy_b
-        env:
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
-          PARAMS=$(cat <<EOF
-          {"commands":["docker pull $DOCKER_USERNAME/community-backend:latest","docker stop community-backend || true","docker rm community-backend || true","docker run -d --name community-backend --restart always -p 8080:8080 -e PROFILE=prod -e DB_URL=$DB_URL -e DB_USERNAME=$DB_USERNAME -e DB_PASSWORD=$DB_PASSWORD $DOCKER_USERNAME/community-backend:latest"]}
-          EOF
-          )
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids ${{ secrets.AWS_INSTANCE_ID_B }} \
             --document-name "AWS-RunShellScript" \
-            --parameters "$PARAMS" \
+            --parameters '{"commands":["docker pull peterj0117/community-backend:latest","docker stop community-backend || true","docker rm community-backend || true","docker run -d --name community-backend --restart always -p 8080:8080 -e PROFILE=prod -e DB_URL=jdbc:mysql://10.0.5.94:3306/community?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true -e DB_USERNAME=community -e DB_PASSWORD=Peterjp0117* peterj0117/community-backend:latest"]}' \
             --query "Command.CommandId" \
             --output text)
           echo "command_id=$COMMAND_ID" >> $GITHUB_OUTPUT
