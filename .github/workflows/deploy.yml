@@ -43,62 +43,31 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
 
-      # 5. Backend-A 배포
+      # 5. Backend-A에서 deploy.sh 실행 (블루-그린 배포)
       - name: Deploy to Backend-A
-        id: deploy_a
+        id: deploy
         env:
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_PORT: ${{ secrets.DB_PORT }}
           DB_NAME: ${{ secrets.DB_NAME }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: |
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids ${{ secrets.AWS_INSTANCE_ID_A }} \
             --document-name "AWS-RunShellScript" \
-            --parameters "{\"commands\":[\"docker pull $DOCKER_USERNAME/community-backend:latest\",\"docker stop community-backend || true\",\"docker rm community-backend || true\",\"docker run -d --name community-backend --restart always -p 8080:8080 -e PROFILE=prod -e DB_HOST=$DB_HOST -e DB_PORT=$DB_PORT -e DB_NAME=$DB_NAME -e DB_USERNAME=$DB_USERNAME -e DB_PASSWORD=$DB_PASSWORD $DOCKER_USERNAME/community-backend:latest\"]}" \
+            --parameters "{\"commands\":[\"export DB_HOST=$DB_HOST && export DB_PORT=$DB_PORT && export DB_NAME=$DB_NAME && export DB_USERNAME=$DB_USERNAME && export DB_PASSWORD=$DB_PASSWORD && /home/ubuntu/app/deploy.sh\"]}" \
             --query "Command.CommandId" \
             --output text)
           echo "command_id=$COMMAND_ID" >> $GITHUB_OUTPUT
 
-      # 6. Backend-A 배포 결과 확인
-      - name: Check Backend-A deployment
+      # 6. 배포 결과 확인
+      - name: Check deployment result
         run: |
-          sleep 30s
+          sleep 60s
           aws ssm list-command-invocations \
             --details \
             --instance-id ${{ secrets.AWS_INSTANCE_ID_A }} \
-            --command-id "${{ steps.deploy_a.outputs.command_id }}" \
-            --query "CommandInvocations[].CommandPlugins[].{Status:Status,Output:Output}" \
-            --output table
-
-      # 7. Backend-B 배포
-      - name: Deploy to Backend-B
-        id: deploy_b
-        env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        run: |
-          COMMAND_ID=$(aws ssm send-command \
-            --instance-ids ${{ secrets.AWS_INSTANCE_ID_B }} \
-            --document-name "AWS-RunShellScript" \
-            --parameters "{\"commands\":[\"docker pull $DOCKER_USERNAME/community-backend:latest\",\"docker stop community-backend || true\",\"docker rm community-backend || true\",\"docker run -d --name community-backend --restart always -p 8080:8080 -e PROFILE=prod -e DB_HOST=$DB_HOST -e DB_PORT=$DB_PORT -e DB_NAME=$DB_NAME -e DB_USERNAME=$DB_USERNAME -e DB_PASSWORD=$DB_PASSWORD $DOCKER_USERNAME/community-backend:latest\"]}" \
-            --query "Command.CommandId" \
-            --output text)
-          echo "command_id=$COMMAND_ID" >> $GITHUB_OUTPUT
-
-      # 8. Backend-B 배포 결과 확인
-      - name: Check Backend-B deployment
-        run: |
-          sleep 30s
-          aws ssm list-command-invocations \
-            --details \
-            --instance-id ${{ secrets.AWS_INSTANCE_ID_B }} \
-            --command-id "${{ steps.deploy_b.outputs.command_id }}" \
+            --command-id "${{ steps.deploy.outputs.command_id }}" \
             --query "CommandInvocations[].CommandPlugins[].{Status:Status,Output:Output}" \
             --output table
