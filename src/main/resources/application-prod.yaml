@@ -13,6 +13,16 @@ spring:
       # none: DDL 아무것도 실행하지 않음, validate: 테이블 구조만 검증
       ddl-auto: none
 
+# Actuator 헬스체크 관련 설정 (k8s 헬스체크용)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
 # EC2 환경 파일 업로드 경로 (EC2 서버 내 실제 존재하는 경로로 지정)
 file:
   path: /home/ubuntu/upload
