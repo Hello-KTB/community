@@ -17,6 +17,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    // 헬스체크(/health) 경로 시큐리티 제외 설정 추가
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring().requestMatchers("/health", "/actuator/**");
