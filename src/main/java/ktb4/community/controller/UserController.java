@@ -2,6 +2,7 @@ package ktb4.community.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import ktb4.community.dto.response.PresignedUrlResponseDto;
 import ktb4.community.global.code.SuccessCode;
 import ktb4.community.dto.request.CreateUserRequestDto;
 import ktb4.community.dto.request.UpdatePasswordRequestDto;
@@ -121,12 +122,19 @@ public class UserController {
         return ResponseEntity.ok(ApiResponseDto.success(null, SuccessCode.CHECK_NICKNAME_SUCCESS));
     }
 
-    @PostMapping("/upload/profile-image")
-    public ResponseEntity<ApiResponseDto> uploadProfileImage(@RequestParam("profileImage") MultipartFile file) {
-        String url = imageService.uploadImage(file, "PROFILE");
+    /**
+     * 프로필 이미지 S3 Presigned URL 발급 API
+     * POST /v1/users/profile/presigned-url?filename=example.png
+     *
+     * 클라이언트가 프로필 이미지 업로드 전 이 API를 먼저 호출하여 Presigned URL을 발급받습니다.
+     */
+    @PostMapping("/profile/presigned-url")
+    public ResponseEntity<ApiResponseDto> getProfilePresignedUrl(@RequestParam("filename") String filename) {
+        // 💡 ImageService의 새 메소드 호출
+        PresignedUrlResponseDto responseDto = imageService.generatePresignedUrl(filename);
 
         return ResponseEntity.ok(ApiResponseDto.success(
-                Map.of("profileImageUrl", url),
+                responseDto,
                 SuccessCode.IMAGE_UPLOAD_SUCCESS));
     }
 }
