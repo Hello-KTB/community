@@ -13,6 +13,17 @@ spring:
       # none: DDL 아무것도 실행하지 않음, validate: 테이블 구조만 검증
       ddl-auto: none
 
+  # Spring Cloud AWS S3 설정 (spring: 하위에 계층 맞춤)
+  cloud:
+    aws:
+      s3:
+        bucket: ${AWS_S3_BUCKET}
+      region:
+        static: ${AWS_REGION:ap-northeast-2}
+      credentials:
+        access-key: ${AWS_ACCESS_KEY_ID}
+        secret-key: ${AWS_SECRET_ACCESS_KEY}
+
 # Actuator 헬스체크 관련 설정 (k8s 헬스체크용)
 management:
   endpoints:
@@ -22,7 +33,3 @@ management:
   endpoint:
     health:
       show-details: always
-
-# EC2 환경 파일 업로드 경로 (EC2 서버 내 실제 존재하는 경로로 지정)
-file:
-  path: /home/ubuntu/upload
