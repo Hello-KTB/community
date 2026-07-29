@@ -219,12 +219,19 @@ public class PostController {
                 .body(ApiResponseDto.success(comments.getContent(), SuccessCode.GET_COMMENTS_SUCCESS));
     }
 
-    @PostMapping("/upload/attach-file")
-    public ResponseEntity<ApiResponseDto> uploadPostImage(@RequestParam("postFile") MultipartFile file) {
-        String url = imageService.uploadImage(file, "POST");
+    /**
+     * S3 Presigned URL 발급 API
+     * POST /v1/posts/upload/presigned-url?filename=example.png
+     *
+     * 클라이언트가 파일 업로드 전 이 API를 먼저 호출하여 Presigned URL을 발급받습니다.
+     * 클라이언트는 반환받은 presignedUrl로 S3에 직접 PUT 요청을 보내 파일을 업로드합니다.
+     */
+    @PostMapping("/upload/presigned-url")
+    public ResponseEntity<ApiResponseDto> getPresignedUrl(@RequestParam("filename") String filename) {
+        PresignedUrlResponseDto responseDto = imageService.generatePresignedUrl(filename);
 
         return ResponseEntity.ok(ApiResponseDto.success(
-                Map.of("fileUrl", url),
+                responseDto,
                 SuccessCode.IMAGE_UPLOAD_SUCCESS));
     }
 }
