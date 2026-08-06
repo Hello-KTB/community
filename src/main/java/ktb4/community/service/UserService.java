@@ -100,11 +100,18 @@ public class UserService {
     @Transactional
     public void updatePassword(Long id, UpdatePasswordRequestDto dto) {
         User user = findById(id);
+
+        System.out.println("=========================================");
+        System.out.println("1. 넘겨받은 newPassword: " + dto.getNewPassword());
+        System.out.println("2. DB에 저장된 user.getPassword(): " + user.getPassword());
+        System.out.println("3. passwordEncoder 비교 결과: " + passwordEncoder.matches(dto.getNewPassword(), user.getPassword()));
+        System.out.println("=========================================");
+
         // 새 비밀번호가 현재 비밀번호와 같으면 변경 불가
-        if (passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+        if (passwordEncoder.matches(dto.getNewPassword(), user.getPassword())) {
             throw new CustomException(ErrorCode.SAME_AS_CURRENT_PASSWORD);
         }
-        user.updatePassword(passwordEncoder.encode(dto.getPassword()));
+        user.updatePassword(passwordEncoder.encode(dto.getNewPassword()));
         userRepository.save(user);
     }
 

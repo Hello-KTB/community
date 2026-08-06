@@ -1,5 +1,6 @@
 package ktb4.community.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -25,5 +26,6 @@ public class CreateUserRequestDto {
     @Size(max = 10, message = "닉네임은 최대 10자 까지 작성 가능합니다")
     private String nickname;
 
+    @JsonProperty("profileImageUrl")
     private String profileImage;
 }
