@@ -197,4 +197,34 @@ public class PostService {
         }
         postRepository.delete(post);
     }
+
+    /**
+     * 게시물 검색 (QueryDSL 기반)
+     * 키워드, 정렬 방식, offset/limit 기반으로 검색을 수행
+     * Post 엔티티를 그대로 반환하면 지연 로딩 프록시 직렬화 에러가 발생하므로 DTO로 변환
+     *
+     * 파라미터 : keyword 검색할 키워드 (제목 또는 내용)
+     * 파라미터 : offset  시작 위치 (0부터 시작)
+     * 파라미터 : limit   한 번에 가져올 개수
+     * 파라미터 : sort    정렬 방식 (recent, views, likes)
+     * 반환 : PostSummaryResponseDto의 List
+     */
+    public List<PostSummaryResponseDto> searchPosts(String keyword, int offset, int limit, String sort) {
+        // QueryDSL Custom Repository 호출하여 검색 수행
+        List<Post> posts = postRepository.searchPosts(keyword, sort, offset, limit);
+
+        // 엔티티 → DTO 변환 (지연 로딩 프록시 직렬화 에러 및 카운트 정보 조립)
+        return posts.stream()
+                .map(post -> new PostSummaryResponseDto(
+                        post.getId(),
+                        post.getTitle(),
+                        new AuthorResponseDto(post.getAuthor().getNickname(), post.getAuthor().getProfileImage()),
+                        postLikeRepository.countByPostLikeId_PostId(post.getId()),
+                        commentRepository.countByPostId(post.getId()),
+                        post.getViews(),
+                        post.getCreatedAt(),
+                        post.getUpdatedAt()
+                ))
+                .toList();
+    }
 }
