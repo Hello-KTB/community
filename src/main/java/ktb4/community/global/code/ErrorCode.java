@@ -35,7 +35,8 @@ public enum ErrorCode {
 
     // 이미지
     IMAGE_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드에 실패하셨습니다"),
-    INVALID_FILE(HttpStatus.BAD_REQUEST, "유효하지 않은 파일입니다");
+    INVALID_FILE(HttpStatus.BAD_REQUEST, "유효하지 않은 파일입니다"),
+    FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "파일 크기는 5MB 이하여야 합니다");
 
     // 기본 필드
     private final HttpStatus status;

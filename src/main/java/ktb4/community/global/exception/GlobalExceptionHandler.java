@@ -33,7 +33,6 @@ public class GlobalExceptionHandler {
     // CustomException 처리
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ApiResponseDto> handleCustomException(CustomException e) {
-        logger.error("Resource Not Found: {}", e.getMessage());
         return ResponseEntity
                 .status(e.getErrorCode().getStatus())
                 .body(ApiResponseDto.error(e.getErrorCode()));

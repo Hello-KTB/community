@@ -1,5 +1,6 @@
 package ktb4.community.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -14,6 +15,7 @@ public class PostDetailResponseDto {
     private String profileImage;
     private Long writerId;
     private String content;
+    @JsonProperty("fileUrl")
     private String image;
     private Boolean isLiked;
     private long likeCount;
