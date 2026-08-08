@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -13,9 +14,11 @@ import java.util.Date;
 
 @Component
 public class JwtProvider {
-    private final SecretKey key = Keys.hmacShaKeyFor(
-            Base64.getDecoder().decode("YWRhcHRlcnphZGFwdGVyemFkYXB0ZXJ6YWRhcHRlcnphZGFwdGVyeg==") // adapterzadapterzadapterzadapterzadapterz
-    );
+    private final SecretKey key;
+
+    public JwtProvider(@Value("${spring.jwt.secret-key}") String secretKey) {
+        this.key = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretKey));
+    }
 
     // Access Token 생성 (15분)
     public String createAccessToken(Long userId) {
