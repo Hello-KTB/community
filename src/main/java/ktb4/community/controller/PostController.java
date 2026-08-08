@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 // 게시물 관련 HTTP 요청을 처리하는 컨트롤러
@@ -228,10 +229,34 @@ public class PostController {
      */
     @PostMapping("/upload/presigned-url")
     public ResponseEntity<ApiResponseDto> getPresignedUrl(@RequestParam("filename") String filename) {
-        PresignedUrlResponseDto responseDto = imageService.generatePresignedUrl(filename);
+        // "posts" 폴더 하위에 저장되도록 dirName 전달
+        PresignedUrlResponseDto responseDto = imageService.generatePresignedUrl(filename, "posts");
 
         return ResponseEntity.ok(ApiResponseDto.success(
                 responseDto,
                 SuccessCode.IMAGE_UPLOAD_SUCCESS));
+    }
+
+    /**
+     * 게시물 검색 (무한 스크롤 및 정렬)
+     * GET /v1/posts/search?keyword=검색어&offset=0&limit=5&sort=recent
+     * 토큰 불필요 (인증 없이 조회 가능)
+     *
+     * 파라미터 : keyword 검색할 키워드 (제목 또는 내용)
+     * 파라미터 : offset  시작 위치 (0부터 시작, 기본값 0)
+     * 파라미터 : limit   한 번에 가져올 개수 (기본값 5)
+     * 파라미터 : sort    정렬 방식 (recent, views, likes, 기본값 recent)
+     * 응답 : 200 OK, 검색된 게시물 목록 반환
+     */
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponseDto> searchPosts(
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "5") int limit,
+            @RequestParam(defaultValue = "recent") String sort) {
+        List<PostSummaryResponseDto> posts = postService.searchPosts(keyword, offset, limit, sort);
+        return ResponseEntity
+                .status(SuccessCode.GET_POSTS_SUCCESS.getStatus())
+                .body(ApiResponseDto.success(posts, SuccessCode.GET_POSTS_SUCCESS));
     }
 }
