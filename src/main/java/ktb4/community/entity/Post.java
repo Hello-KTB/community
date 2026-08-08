@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 // 게시글 엔티티
 @Entity
@@ -66,7 +68,7 @@ public class Post {
     public void update(String title, String content, String image) {
         if (title != null) this.title = title;
         if (content != null) this.content = content;
-        if (image != null) this.image = image;
+        this.image = image;
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -74,4 +76,7 @@ public class Post {
     public void increaseViews() {
         this.views++;
     }
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 }

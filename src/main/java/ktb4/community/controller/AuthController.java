@@ -49,8 +49,9 @@ public class AuthController {
      * 응답 : 200 OK
      */
     @DeleteMapping("/tokens")
-    public ResponseEntity<Object> logout(HttpServletResponse response) {
-        authService.logoutUser(response);
+    public ResponseEntity<Object> logout(HttpServletRequest request, HttpServletResponse response) {
+        Long userId = (Long) request.getAttribute("userId");
+        authService.logoutUser(userId, response);
         return ResponseEntity.ok().build();
     }
 
@@ -74,7 +75,32 @@ public class AuthController {
         User user = authService.getUser(userId);
         return ResponseEntity.ok()
                 .body(new ApiResponseDto<>(200, true, "로그인 상태입니다",
-                        new AuthorResponseDto(user.getNickname(), user.getProfileImage())
+                        new AuthorResponseDto(user.getId(), user.getNickname(), user.getProfileImage())
                 ));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<Object> refresh(HttpServletRequest request, HttpServletResponse response) {
+        // 쿠키에서 refreshToken 추출
+        String refreshToken = null;
+        if (request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if ("refreshToken".equals(cookie.getName())) {
+                    refreshToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        if (refreshToken == null) {
+            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).build();
+        }
+
+        String newAccessToken = authService.refreshToken(refreshToken, response);
+        if (newAccessToken == null) {
+            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).build();
+        }
+
+        return ResponseEntity.ok().body(new LoginResponseDto(newAccessToken));
     }
 }

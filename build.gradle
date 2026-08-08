@@ -55,9 +55,15 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
 	/**
-	 * k8s 헬스체크용
+	 * k8s 헬스체크 및 프로메테우스 메트릭 수집용
 	 */
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
+	/**
+	 * Redis 의존성 추가
+	 */
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
 
 tasks.named('test') {

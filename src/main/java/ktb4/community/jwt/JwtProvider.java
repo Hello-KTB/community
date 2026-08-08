@@ -17,12 +17,24 @@ public class JwtProvider {
             Base64.getDecoder().decode("YWRhcHRlcnphZGFwdGVyemFkYXB0ZXJ6YWRhcHRlcnphZGFwdGVyeg==") // adapterzadapterzadapterzadapterzadapterz
     );
 
+    // Access Token 생성 (15분)
     public String createAccessToken(Long userId) {
-        long accessTtlSec = 15 * 60;
+        long accessTtlSec = 30 * 60;
         return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .issuedAt(new Date())
                 .expiration(Date.from(Instant.now().plusSeconds(accessTtlSec)))
+                .signWith(key)
+                .compact();
+    }
+
+    // Refresh Token 생성 (7일)
+    public String createRefreshToken(Long userId) {
+        long refreshTtlSec = 7 * 24 * 60 * 60;
+        return Jwts.builder()
+                .subject(String.valueOf(userId))
+                .issuedAt(new Date())
+                .expiration(Date.from(Instant.now().plusSeconds(refreshTtlSec)))
                 .signWith(key)
                 .compact();
     }
