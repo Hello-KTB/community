@@ -5,10 +5,13 @@ import ktb4.community.entity.User;
 import ktb4.community.jwt.JwtProvider;
 import ktb4.community.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.concurrent.TimeUnit;
 
 // 인증 관련 비즈니스 로직을 처리하는 서비스 계층
 // 로그인, 로그아웃, 토큰 발급을 담당
@@ -20,9 +23,11 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final StringRedisTemplate redisTemplate;
 
     // Access Token 만료 시간 (15분)
     private static final int ACCESS_TOKEN_EXPIRATION = 15 * 60;
+    private static final int REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60;
 
     /**
      * ID로 회원 조회
@@ -55,11 +60,22 @@ public class AuthService {
             return null;
         }
 
-        // userId를 담은 Access Token 생성
-        String token = jwtProvider.createAccessToken(user.getId());
-        // 토큰을 HttpOnly 쿠키에 담아 응답
-        addTokenCookie(response, "accessToken", token, ACCESS_TOKEN_EXPIRATION);
-        return token;
+        // userId를 담은 Access Token과 Refresh Token 생성
+        String accessToken = jwtProvider.createAccessToken(user.getId());
+        String refreshToken = jwtProvider.createRefreshToken(user.getId());
+
+        redisTemplate.opsForValue().set(
+                "RT:" + user.getId(),
+                refreshToken,
+                REFRESH_TOKEN_EXPIRATION,
+                TimeUnit.SECONDS
+        );
+
+        // 쿠키 설정
+        addTokenCookie(response, "accessToken", accessToken, ACCESS_TOKEN_EXPIRATION);
+        addTokenCookie(response, "refreshToken", refreshToken, REFRESH_TOKEN_EXPIRATION);
+
+        return accessToken;
     }
 
     /**
@@ -69,9 +85,36 @@ public class AuthService {
      *
      * 파라미터 : response 쿠키를 담을 HTTP 응답 객체
      */
-    public void logoutUser(HttpServletResponse response) {
-        // maxAge=0으로 설정해서 쿠키 즉시 만료
+    public void logoutUser(Long userId, HttpServletResponse response) {
+        if (userId != null) {
+            // Redis에서 Refresh Token 삭제 (RTR 및 토큰 재사용 방지)
+            redisTemplate.delete("RT:" + userId);
+        }
         addTokenCookie(response, "accessToken", null, 0);
+        addTokenCookie(response, "refreshToken", null, 0);
+    }
+
+    public String refreshToken(String refreshToken, HttpServletResponse response) {
+        try {
+            var jws = jwtProvider.parse(refreshToken);
+            Long userId = Long.valueOf(jws.getPayload().getSubject());
+
+            // Redis에 저장된 Refresh Token 가져오기
+            String savedRefreshToken = redisTemplate.opsForValue().get("RT:" + userId);
+
+            // Redis의 토큰과 클라이언트 토큰이 일치하는지 검증
+            if (savedRefreshToken == null || !savedRefreshToken.equals(refreshToken)) {
+                return null;
+            }
+
+            // 새 Access Token 생성
+            String newAccessToken = jwtProvider.createAccessToken(userId);
+            addTokenCookie(response, "accessToken", newAccessToken, ACCESS_TOKEN_EXPIRATION);
+
+            return newAccessToken;
+        } catch (Exception e) {
+            return null; // 토큰 만료되거나 변조된 경우
+        }
     }
 
     /**

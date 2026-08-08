@@ -10,8 +10,12 @@ spring:
   jpa:
     hibernate:
       # 운영 환경에서는 절대 create 사용 금지 → 기존 데이터 전부 삭제됨
-      # none: DDL 아무것도 실행하지 않음, validate: 테이블 구조만 검증
-      ddl-auto: none
+      ddl-auto: update
+
+  data:
+    redis:
+      host: ${DB_HOST}
+      port: 6379
 
   # Spring Cloud AWS S3 설정 (spring: 하위에 계층 맞춤)
   cloud:
@@ -31,8 +35,10 @@ management:
       exposure:
         include: health, prometheus
   endpoint:
+    prometheus:
+      enabled: true
     health:
       show-details: always
   metrics:
     tags:
-      application: ${spring.application.name:my-spring-app}
+      application: community-app

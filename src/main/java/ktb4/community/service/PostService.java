@@ -17,6 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.*;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,6 +96,7 @@ public class PostService {
      * 파라미터 : limit  한 번에 가져올 개수
      * 반환 : PostSummaryResponseDto의 Slice
      */
+    @Cacheable(value = "postListCache", key = "'offset:' + #offset + ':limit:' + #limit")
     public Slice<PostSummaryResponseDto> getPostsWithPaging(int offset, int limit) {
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("createdAt"));
@@ -101,7 +109,7 @@ public class PostService {
         return posts.map(post -> new PostSummaryResponseDto(
                 post.getId(),
                 post.getTitle(),
-                new AuthorResponseDto(post.getAuthor().getNickname(), post.getAuthor().getProfileImage()),
+                new AuthorResponseDto(post.getAuthor().getId(), post.getAuthor().getNickname(), post.getAuthor().getProfileImage()),
                 postLikeRepository.countByPostLikeId_PostId(post.getId()),
                 commentRepository.countByPostId(post.getId()),
                 post.getViews(),
@@ -118,6 +126,7 @@ public class PostService {
      * 파라미터 : id 조회할 게시물 ID
      * 반환 : PostDetailResponseDto
      */
+    @Cacheable(value = "postDetailCache", key = "#postId")
     @Transactional
     public PostDetailResponseDto getPostDetail(Long postId, Long userId) {
         Post post = findById(postId);
@@ -155,6 +164,7 @@ public class PostService {
      * 반환 : 수정된 Post 엔티티
      * @throws ResponseStatusException : 작성자가 아닐 경우 403
      */
+    @CacheEvict(value = "postDetailCache", key = "#postId")
     @Transactional
     public UpdatePostResponseDto update(Long postId, Long userId, String title, String content, String image) {
         Post post = findById(postId);
@@ -188,6 +198,7 @@ public class PostService {
      * 파라미터 : userId 토큰에서 추출한 요청자 ID (작성자 검증용)
      * @throws ResponseStatusException : 작성자가 아닐 경우 403
      */
+    @CacheEvict(value = "postDetailCache", key = "#postId")
     @Transactional
     public void delete(Long postId, Long userId) {
         Post post = findById(postId);
@@ -218,7 +229,7 @@ public class PostService {
                 .map(post -> new PostSummaryResponseDto(
                         post.getId(),
                         post.getTitle(),
-                        new AuthorResponseDto(post.getAuthor().getNickname(), post.getAuthor().getProfileImage()),
+                        new AuthorResponseDto(post.getAuthor().getId(), post.getAuthor().getNickname(), post.getAuthor().getProfileImage()),
                         postLikeRepository.countByPostLikeId_PostId(post.getId()),
                         commentRepository.countByPostId(post.getId()),
                         post.getViews(),

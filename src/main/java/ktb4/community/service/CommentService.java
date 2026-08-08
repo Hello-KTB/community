@@ -66,6 +66,7 @@ public class CommentService {
         return new CommentResponseDto(
                 comment.getId(),
                 comment.getPost().getId(),
+                comment.getAuthor().getId(),
                 comment.getAuthor().getNickname(),
                 comment.getContent(),
                 comment.getCreatedAt(),
@@ -116,6 +117,7 @@ public class CommentService {
         return new CommentResponseDto(
                 comment.getId(),
                 comment.getPost().getId(),
+                comment.getAuthor().getId(),
                 comment.getAuthor().getNickname(),
                 comment.getContent(),
                 comment.getCreatedAt(),
@@ -164,6 +166,7 @@ public class CommentService {
                 .map(comment -> new CommentResponseDto(
                         comment.getId(),
                         comment.getPost().getId(),
+                        comment.getAuthor().getId(),
                         comment.getAuthor().getNickname(),
                         comment.getContent(),
                         comment.getCreatedAt(),

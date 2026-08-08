@@ -24,10 +24,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     // 필터 제외 경로 목록
     private static final String[] EXCLUDED_PATHS = {
             "/v1/auth/tokens",
+            "/v1/auth/refresh",
             "/v1/users/email/check",
             "/v1/users/nickname/check",
             "/v1/users/profile/presigned-url",
-            "/health"
+            "/health",
+            "/actuator"
     };
 
     // 필터 제외 경로 설정
