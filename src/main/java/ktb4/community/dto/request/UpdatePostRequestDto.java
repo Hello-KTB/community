@@ -1,5 +1,6 @@
 package ktb4.community.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,5 +10,7 @@ import lombok.Setter;
 public class UpdatePostRequestDto {
     private String title;
     private String content;
+
+    @JsonProperty("attachFileUrl")
     private String image;
 }
