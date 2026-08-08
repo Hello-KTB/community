@@ -13,5 +13,5 @@ public class UpdatePasswordRequestDto {
     @NotBlank(message = "새 비밀번호를 입력해주세요")
     @Size(min = 8, max = 20)
     @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%]).+$")
-    private String password;
+    private String newPassword;
 }

@@ -14,9 +14,6 @@ import ktb4.community.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Map;
 
 // 회원 관련 HTTP 요청을 처리하는 컨트롤러
 // /v1/users 하위 URI를 담당
@@ -130,8 +127,8 @@ public class UserController {
      */
     @PostMapping("/profile/presigned-url")
     public ResponseEntity<ApiResponseDto> getProfilePresignedUrl(@RequestParam("filename") String filename) {
-        // 💡 ImageService의 새 메소드 호출
-        PresignedUrlResponseDto responseDto = imageService.generatePresignedUrl(filename);
+        // "profiles" 폴더 하위에 저장되도록 dirName 전달
+        PresignedUrlResponseDto responseDto = imageService.generatePresignedUrl(filename, "profiles");
 
         return ResponseEntity.ok(ApiResponseDto.success(
                 responseDto,
