@@ -17,6 +17,9 @@ spring:
       host: ${DB_HOST}
       port: 6379
 
+  jwt:
+    secret-key: ${JWT_SECRET_KEY}
+
   # Spring Cloud AWS S3 설정 (spring: 하위에 계층 맞춤)
   cloud:
     aws:
