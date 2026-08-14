@@ -4,11 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
-public class PostDetailResponseDto {
+public class PostDetailResponseDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private Long id;
     private String title;
     private String nickname;
