@@ -25,7 +25,7 @@
 
 ## 🎬 서비스 시연 영상
 
-[> 시연 영상](https://drive.google.com/file/d/13LUqWx_8h5lNPNGop6hy7RL_uPvafIhl/view?usp=drive_link)
+[시연 영상](https://drive.google.com/file/d/13LUqWx_8h5lNPNGop6hy7RL_uPvafIhl/view?usp=drive_link)
 
 ---
 
